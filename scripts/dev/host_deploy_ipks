@@ -15,7 +15,7 @@ import sys
 from tempfile import TemporaryDirectory
 import urllib.parse
 
-__author__ = "Alex Stewart <alex.stewart@ni.com>"
+__author__ = "Alex Stewart <alex.stewart@emerson.com>"
 __version__ = "1"
 SCRIPT_NAME = "host_deploy_ipks"  # value intentionally not computed at runtime
 
