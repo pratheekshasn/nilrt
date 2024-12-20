@@ -16,7 +16,10 @@ The evergreen, canonical changelog for *all NILRT branches* can be [found here](
 
 ----
 ## 11.0
-Branch: `nilrt/master/next`
+Branch: `nilrt/25.0/scarthgap`
+
+### nilrt
+No changes.
 
 ### meta-nilrt
 #### Added
@@ -25,6 +28,11 @@ Branch: `nilrt/master/next`
 - [Added](https://github.com/ni/meta-nilrt/pull/717) `libpwquality` to the core packagefeed.
 - [Added](https://github.com/ni/meta-nilrt/pull/726) `nftables` to runmode.
 - [Added](https://github.com/ni/meta-nilrt/pull/729) `nilrt-snac` recipe to put system into SNAC configuration.
+- [Added](https://github.com/ni/meta-nilrt/pull/782) the ability to upgrade opkg-keyrings to get the latest signing keys during the installation of BSI.
+- [Added](https://github.com/ni/meta-nilrt/pull/775) opkg-keyrings visibility on MAX, now users can upgrade their keyrings directly from MAX.
+- [Added](https://github.com/ni/meta-nilrt/pull/776) metadata parsing functionality to opkg-utils so it can read custom metadata in a package.
+- [Added](https://github.com/ni/meta-nilrt/pull/792) a new signing key to the base system image.
+
 
 #### Changed
 - [Upgraded](https://github.com/ni/meta-nilrt/pull/663) ni-grpc-device to `2.4.0`.
@@ -38,6 +46,7 @@ Branch: `nilrt/master/next`
 
 #### Fixed
 - [Fixed](https://github.com/ni/meta-nilrt/pull/676) a parsing error in the recovery media provisioning scripts.
+- [Fixed](https://github.com/ni/meta-nilrt/pull/763) sysconfig settings to prevent users from accidentally enabling the UI in the SNAC configuration.
 
 
 ----
@@ -365,6 +374,32 @@ Branch: `nilrt/22.5/hardknott`
 - [Removed](https://github.com/ni/meta-nilrt/pull/355) boot attestation based on now dead upstream code.
 - [Removed](https://github.com/ni/meta-nilrt/pull/290) packages dropped from upstream.
 
+
+----
+## 8.22
+Branch: `nilrt/25.0/sumo`
+
+### nilrt
+
+No changes.
+
+### meta-nilrt
+
+- [Added](https://github.com/ni/meta-nilrt/pull/792) new signing key into opkg-keyrings.
+
+
+----
+## 8.21
+Branch: `nilrt/24.8/sumo`
+
+No changes.
+
+
+----
+## 8.20
+Branch: `nilrt/24.5/sumo`
+
+No changes.
 
 ----
 ## 8.19
