@@ -5,6 +5,7 @@ from GitRepo import *
 
 REMOTE_REPO_NAME = "automerge_upstream"
 LOCAL_BRANCH_NAME = "dev/automerge/ni"
+LOCAL_FORK_NAME = "myfork"
 
 LOG_FILE = "merge_log.txt"
 EMAIL_FROM = "shreejit.c@emerson.com"
@@ -23,19 +24,26 @@ def parse_args():
 
 def handle_repo(git_obj,FORCE_CHECKOUT):
     os.chdir(git_obj.local_repo)
+    print(f"{git_obj.local_repo}")
     
     if not FORCE_CHECKOUT and not git_obj.branch_exists(git_obj.local_base_branch):
+        print(f"\n    Branch {git_obj.local_base_branch} does not exist. Exiting")
         return (1,f"\n    Branch {git_obj.local_base_branch} does not exist. Exiting")
 
     if git_obj.checkout_branch(git_obj.local_base_branch) != (0,None):
+        print(f"\n    Error switching to branch {git_obj.local_base_branch}. Exiting")
         return (1,f"\n    Error switching to branch {git_obj.local_base_branch}. Exiting")
 
     if git_obj.pull_latest() != (0,None):
+        print(f"\n    Error pulling latest on {git_obj.local_base_branch}. Exiting")
         return (1,f"\n    Error pulling latest on {git_obj.local_base_branch}. Exiting")
 
-    git_obj.add_remote()
-    
+    if git_obj.add_remote() != (0,None):
+        print(f"\n    Error adding remote repository {git_obj.remote_repository} using {git_obj.upstream_repo_url}. Exiting")
+        return (1,f"\n    Error adding remote repository {git_obj.remote_repository} using {git_obj.upstream_repo_url}. Exiting")
+
     if git_obj.fetch_branch() != (0,None):
+        print(f"\n    Error fetching {git_obj.upstream_branch} from {REMOTE_REPO_NAME}. Exiting")
         return (1,f"\n    Error fetching {git_obj.upstream_branch} from {REMOTE_REPO_NAME}. Exiting")
 
     if git_obj.branch_exists(LOCAL_BRANCH_NAME):
@@ -43,6 +51,7 @@ def handle_repo(git_obj,FORCE_CHECKOUT):
         git_obj.delete_branch(LOCAL_BRANCH_NAME)
 
     if git_obj.create_branch(LOCAL_BRANCH_NAME) != (0,None):
+        print(f"\n    Error creating {LOCAL_BRANCH_NAME}. Exiting")
         return (1,f"\n    Error creating {LOCAL_BRANCH_NAME}. Exiting")
 
     commit_before_merge = git_obj.get_current_commit()
@@ -50,7 +59,20 @@ def handle_repo(git_obj,FORCE_CHECKOUT):
     merge_result = git_obj.merge_branch(f"{REMOTE_REPO_NAME}/{git_obj.upstream_branch}")
 
     if merge_result[0] == 0:
+        
+        if git_obj.add_remote() != (0,None):
+            print(f"\n    Error adding remote repository {git_obj.myfork_name} using {git_obj.myfork_url}. Exiting")
+            return (1,f"\n    Error adding remote repository {git_obj.myfork_name} using {git_obj.myfork_url}. Exiting")
+    
+        if git_obj.push(LOCAL_FORK_NAME,LOCAL_BRANCH_NAME) != (0,None):
+            print(f"Failed to push branch {LOCAL_BRANCH_NAME} to {LOCAL_FORK_NAME}")
+            return (1, f"Failed to push branch {LOCAL_BRANCH_NAME} to {LOCAL_FORK_NAME}")
+        
+        if(git_obj.create_pull_request("Automated Merge PR","Testing",git_obj.local_base_branch,LOCAL_BRANCH_NAME) != (0,None)):
+            print("\n    Error creating the pull request.")
+        
         diff_output=git_obj.diff()
+        
         if (git_obj.get_current_commit() == commit_before_merge) or diff_output == (0,None):
             return (0,None)
         else:
@@ -90,7 +112,7 @@ def main(CONF_FILE,FORCE_CHECKOUT):
             if line.startswith("#"):
                 continue
             parts = line.split()
-            git_obj=GitRepo(parts[0],parts[1],parts[2],parts[3],REMOTE_REPO_NAME)
+            git_obj=GitRepo(parts[0],parts[1],parts[2],parts[3],REMOTE_REPO_NAME,LOCAL_FORK_NAME,parts[4])
             output_report[parts[0]] = handle_repo(git_obj,FORCE_CHECKOUT)
             os.chdir(current_directory)
 
