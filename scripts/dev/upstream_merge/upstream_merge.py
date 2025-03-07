@@ -60,15 +60,15 @@ def handle_repo(git_obj,FORCE_CHECKOUT):
 
     if merge_result[0] == 0:
         
-        if git_obj.add_remote() != (0,None):
+        if git_obj.add_remote(git_obj.myfork_name, git_obj.myfork_url) != (0,None):
             print(f"\n    Error adding remote repository {git_obj.myfork_name} using {git_obj.myfork_url}. Exiting")
             return (1,f"\n    Error adding remote repository {git_obj.myfork_name} using {git_obj.myfork_url}. Exiting")
-    
-        if git_obj.push(LOCAL_FORK_NAME,LOCAL_BRANCH_NAME) != (0,None):
+
+        if git_obj.push(LOCAL_BRANCH_NAME, LOCAL_FORK_NAME) != (0,None):
             print(f"Failed to push branch {LOCAL_BRANCH_NAME} to {LOCAL_FORK_NAME}")
             return (1, f"Failed to push branch {LOCAL_BRANCH_NAME} to {LOCAL_FORK_NAME}")
         
-        if(git_obj.create_pull_request("Automated Merge PR","Testing",git_obj.local_base_branch,LOCAL_BRANCH_NAME) != (0,None)):
+        if(git_obj.create_pull_request("Automated Merge PR","Testing",git_obj.local_base_branch,f"Shreejit-03:{LOCAL_BRANCH_NAME}") != (0,None)):
             print("\n    Error creating the pull request.")
         
         diff_output=git_obj.diff()

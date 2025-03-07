@@ -46,7 +46,7 @@ class GitRepo:
 
         if remote_repo_name in existing_remotes:
             run_command(f"git remote remove {remote_repo_name}")
-        
+
         return run_command(f"git remote add {remote_repo_name} {repo_url}")
     
 
@@ -80,5 +80,8 @@ class GitRepo:
             head_branch = self.local_base_branch
         
         return run_command(f"gh pr create --title {title} --body {body} --base {base_branch} --head {head_branch}", capture_output=True)
+        
+    def print_remote(self):
+        print(run_command("git remote -v",capture_output=True))
 
     
