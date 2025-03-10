@@ -58,24 +58,22 @@ def handle_repo(git_obj,FORCE_CHECKOUT):
     
     merge_result = git_obj.merge_branch(f"{REMOTE_REPO_NAME}/{git_obj.upstream_branch}")
 
-    if merge_result[0] == 0:
-        
-        if git_obj.add_remote(git_obj.myfork_name, git_obj.myfork_url) != (0,None):
-            print(f"\n    Error adding remote repository {git_obj.myfork_name} using {git_obj.myfork_url}. Exiting")
-            return (1,f"\n    Error adding remote repository {git_obj.myfork_name} using {git_obj.myfork_url}. Exiting")
-
-        if git_obj.push(LOCAL_BRANCH_NAME, LOCAL_FORK_NAME) != (0,None):
-            print(f"Failed to push branch {LOCAL_BRANCH_NAME} to {LOCAL_FORK_NAME}")
-            return (1, f"Failed to push branch {LOCAL_BRANCH_NAME} to {LOCAL_FORK_NAME}")
-        
-        if(git_obj.create_pull_request("Automated Merge PR","Testing",git_obj.local_base_branch,f"Shreejit-03:{LOCAL_BRANCH_NAME}") != (0,None)):
-            print("\n    Error creating the pull request.")
-        
+    if merge_result[0] == 0:        
         diff_output=git_obj.diff()
         
         if (git_obj.get_current_commit() == commit_before_merge) or diff_output == (0,None):
             return (0,None)
         else:
+            if git_obj.add_remote(git_obj.myfork_name, git_obj.myfork_url) != (0,None):
+                print(f"\n    Error adding remote repository {git_obj.myfork_name} using {git_obj.myfork_url}. Exiting")
+                return (1,f"\n    Error adding remote repository {git_obj.myfork_name} using {git_obj.myfork_url}. Exiting")
+
+            if git_obj.push(LOCAL_BRANCH_NAME, LOCAL_FORK_NAME) != (0,None):
+                print(f"Failed to push branch {LOCAL_BRANCH_NAME} to {LOCAL_FORK_NAME}")
+                #return (1, f"Failed to push branch {LOCAL_BRANCH_NAME} to {LOCAL_FORK_NAME}")
+            
+            if(git_obj.create_pull_request("Automated_Merge_PR","Testing",git_obj.local_base_branch,f"Shreejit-03:{LOCAL_BRANCH_NAME}") != (0,None)):
+                print("\n    Error creating the pull request.")
             return (0,diff_output[1])
     else:
         return (1,merge_result[1])

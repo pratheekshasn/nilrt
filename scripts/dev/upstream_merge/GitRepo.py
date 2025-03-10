@@ -62,9 +62,13 @@ class GitRepo:
         """Check if there are differences in the last merge."""
         return run_command("git diff HEAD~1 HEAD", capture_output=True)
 
-    def pull_latest(self):
+    def pull_latest(self, branch_name = None, remote_repo_name = None):
         """Pull latest changes from the current branch's remote tracking branch."""
-        return run_command("git pull")
+        if remote_repo_name is None:
+            remote_repo_name = "origin"
+        if branch_name is None:
+            branch_name = self.local_base_branch
+        return run_command("git pull {remote_repo_name} {branch_name}")
 
     def push(self, branch_name, remote_repo_name = None):
         """Push a branch to the remote repository."""
