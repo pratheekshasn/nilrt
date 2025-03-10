@@ -122,7 +122,7 @@ def main():
             if line.startswith("#"):
                 continue
             parts = line.split()
-            local_repo, upstream_repo, upstream_branch, local_base_branch = parts
+            local_repo, upstream_repo, upstream_branch, local_base_branch,myfork_url = parts
             handle_repo(local_repo, upstream_repo, upstream_branch, local_base_branch)
 
 if __name__ == "__main__":
