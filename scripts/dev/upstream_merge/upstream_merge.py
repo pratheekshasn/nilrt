@@ -2,9 +2,10 @@ import os
 import argparse
 from Shell_commands import *
 from GitRepo import *
+from Git_commands import *
 
 REMOTE_REPO_NAME = "automerge_upstream"
-LOCAL_BRANCH_NAME = "dev/automerge/ni"
+MEGE_BRANCH_NAME = "dev/automerge/ni"
 LOCAL_FORK_NAME = "myfork"
 
 LOG_FILE = "merge_log.txt"
@@ -28,31 +29,31 @@ def handle_repo(git_obj,FORCE_CHECKOUT):
     
     if not FORCE_CHECKOUT and not git_obj.branch_exists(git_obj.local_base_branch):
         print(f"\n    Branch {git_obj.local_base_branch} does not exist. Exiting")
-        return (1,f"\n    Branch {git_obj.local_base_branch} does not exist. Exiting")
-
-    if git_obj.checkout_branch(git_obj.local_base_branch) != (0,None):
+        return (1,f"\n    Branch {git_obj.local_base_branch} does not exist. Exiting") 
+    
+    if git_obj.checkout_branch(git_obj.local_base_branch)[0] != 0:
         print(f"\n    Error switching to branch {git_obj.local_base_branch}. Exiting")
         return (1,f"\n    Error switching to branch {git_obj.local_base_branch}. Exiting")
-
+    
     if git_obj.pull_latest() != (0,None):
         print(f"\n    Error pulling latest on {git_obj.local_base_branch}. Exiting")
         return (1,f"\n    Error pulling latest on {git_obj.local_base_branch}. Exiting")
 
-    if git_obj.add_remote() != (0,None):
+    if git_obj.add_remote()[0] != 0:
         print(f"\n    Error adding remote repository {git_obj.remote_repository} using {git_obj.upstream_repo_url}. Exiting")
         return (1,f"\n    Error adding remote repository {git_obj.remote_repository} using {git_obj.upstream_repo_url}. Exiting")
 
-    if git_obj.fetch_branch() != (0,None):
+    if git_obj.fetch_branch()[0] != 0:
         print(f"\n    Error fetching {git_obj.upstream_branch} from {REMOTE_REPO_NAME}. Exiting")
         return (1,f"\n    Error fetching {git_obj.upstream_branch} from {REMOTE_REPO_NAME}. Exiting")
 
-    if git_obj.branch_exists(LOCAL_BRANCH_NAME):
+    if git_obj.branch_exists(MEGE_BRANCH_NAME):
         git_obj.checkout_branch(git_obj.local_base_branch)
-        git_obj.delete_branch(LOCAL_BRANCH_NAME)
+        git_obj.delete_branch(MEGE_BRANCH_NAME)
 
-    if git_obj.create_branch(LOCAL_BRANCH_NAME) != (0,None):
-        print(f"\n    Error creating {LOCAL_BRANCH_NAME}. Exiting")
-        return (1,f"\n    Error creating {LOCAL_BRANCH_NAME}. Exiting")
+    if git_obj.create_branch(MEGE_BRANCH_NAME) != (0,None):
+        print(f"\n    Error creating {MEGE_BRANCH_NAME}. Exiting")
+        return (1,f"\n    Error creating {MEGE_BRANCH_NAME}. Exiting")
 
     commit_before_merge = git_obj.get_current_commit()
     
@@ -64,16 +65,22 @@ def handle_repo(git_obj,FORCE_CHECKOUT):
         if (git_obj.get_current_commit() == commit_before_merge) or diff_output == (0,None):
             return (0,None)
         else:
-            if git_obj.add_remote(git_obj.myfork_name, git_obj.myfork_url) != (0,None):
+            if git_obj.add_remote(git_obj.myfork_name, git_obj.myfork_url)[0] != 0:
                 print(f"\n    Error adding remote repository {git_obj.myfork_name} using {git_obj.myfork_url}. Exiting")
                 return (1,f"\n    Error adding remote repository {git_obj.myfork_name} using {git_obj.myfork_url}. Exiting")
-
-            if git_obj.push(LOCAL_BRANCH_NAME, LOCAL_FORK_NAME) != (0,None):
-                print(f"Failed to push branch {LOCAL_BRANCH_NAME} to {LOCAL_FORK_NAME}")
-                #return (1, f"Failed to push branch {LOCAL_BRANCH_NAME} to {LOCAL_FORK_NAME}")
             
-            if(git_obj.create_pull_request("Automated_Merge_PR","Testing",git_obj.local_base_branch,f"Shreejit-03:{LOCAL_BRANCH_NAME}") != (0,None)):
-                print("\n    Error creating the pull request.")
+            if git_obj.push(MEGE_BRANCH_NAME, LOCAL_FORK_NAME,delete=True)[0] != 0:
+                print(f"\n    Failed to delete branch {MEGE_BRANCH_NAME} on {LOCAL_FORK_NAME}")
+                return (1, f"\n    Failed to delete branch {MEGE_BRANCH_NAME} on {LOCAL_FORK_NAME}")
+            
+            if git_obj.push(MEGE_BRANCH_NAME, LOCAL_FORK_NAME)[0] != 0:
+                print(f"\n    Failed to push branch {MEGE_BRANCH_NAME} to {LOCAL_FORK_NAME}")
+                return (1, f"\n    Failed to push branch {MEGE_BRANCH_NAME} to {LOCAL_FORK_NAME}")
+            
+            # if git_obj.create_pull_request("\'Automated Merge PR\'","Testing",git_obj.local_base_branch,f"Shreejit-03:{MEGE_BRANCH_NAME}")[0] != 0:
+            #     print("\n    Error creating the pull request.")
+            #     return (1,"\n    Error creating the pull request.")
+            
             return (0,diff_output[1])
     else:
         return (1,merge_result[1])
@@ -99,8 +106,6 @@ def format_email(output_report):
                 else:
                     log.write(" ... OK\n")
                     log.write(f"{message}\n")
-        
-
 
 def main(CONF_FILE,FORCE_CHECKOUT):
     current_directory = os.getcwd()
