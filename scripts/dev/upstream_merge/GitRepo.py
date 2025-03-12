@@ -30,6 +30,10 @@ class GitRepo:
 
     def fetch_branch(self, remote_repo_name = None, repo_branch = None):
         """Fetch a remote branch."""
+        if remote_repo_name is None:
+            remote_repo_name = self.remote_repo_name
+        if repo_branch is  None:
+            repo_branch = self.upstream_branch
         return git_fetch(remote_repo_name, repo_branch)
 
     def merge_branch(self, branch_name, message = "Merge latest upstream"):

@@ -34,8 +34,7 @@ def git_pull(remote=None, branch=None, rebase=False, capture_output=False):
         command += " --rebase"
     if remote is not None and branch is not None:
         command += f" {remote} {branch}"
-    print(command)
-    run_command(command, capture_output)
+    return run_command(command, capture_output)
 
 def git_branch(branch_name,show_current=False, create=False, delete=False, capture_output=False):
     """Handles branch operations: create, delete, or list."""
@@ -61,19 +60,19 @@ def git_fetch(remote=None, branch=None):
         command += f" {remote}"
     if branch:
         command += f" {branch}"
-    run_command(command, capture_output=False)
+    return run_command(command, capture_output=False)
 
 def git_remote(name=None, url=None, remove=False, capture_output=False):
     """Handle listing, adding, and removing remote repositories."""
-    if name and url:
-        run_command(f"git remote add {name} {url}", capture_output)
-    elif name and remove:
-        run_command(f"git remote remove {name}", capture_output)
+    if name is not None and url is not None:
+        return run_command(f"git remote add {name} {url}", capture_output)
+    elif name is not None and remove:
+        return run_command(f"git remote remove {name}", capture_output)
     else:
-        run_command("git remote -v", capture_output)
+        return run_command("git remote", capture_output)
 
-def git_merge(branch_name, message="'Merge latest upstream'", no_ff=False, signoff=False, capture_output=False):
-    command = f"git merge {branch_name} --signoff -m {message}" if signoff else f"git merge {branch_name} -m {message}"
+def git_merge(branch_name, message="Merge latest upstream", no_ff=False, signoff=False, capture_output=False):
+    command = f"git merge {branch_name} --signoff -m \"{message}\"" if signoff else f"git merge {branch_name} -m \"{message}\""
     if no_ff:
         command += " --no-ff"
     return run_command(command, capture_output)

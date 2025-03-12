@@ -35,13 +35,13 @@ def handle_repo(git_obj,FORCE_CHECKOUT):
         print(f"\n    Error switching to branch {git_obj.local_base_branch}. Exiting")
         return (1,f"\n    Error switching to branch {git_obj.local_base_branch}. Exiting")
     
-    if git_obj.pull_latest() != (0,None):
+    if git_obj.pull_latest()[0] != 0:
         print(f"\n    Error pulling latest on {git_obj.local_base_branch}. Exiting")
         return (1,f"\n    Error pulling latest on {git_obj.local_base_branch}. Exiting")
 
     if git_obj.add_remote()[0] != 0:
-        print(f"\n    Error adding remote repository {git_obj.remote_repository} using {git_obj.upstream_repo_url}. Exiting")
-        return (1,f"\n    Error adding remote repository {git_obj.remote_repository} using {git_obj.upstream_repo_url}. Exiting")
+        print(f"\n    Error adding remote repository {git_obj.remote_repo_name} using {git_obj.upstream_repo_url}. Exiting")
+        return (1,f"\n    Error adding remote repository {git_obj.remote_repo_name} using {git_obj.upstream_repo_url}. Exiting")
 
     if git_obj.fetch_branch()[0] != 0:
         print(f"\n    Error fetching {git_obj.upstream_branch} from {REMOTE_REPO_NAME}. Exiting")
@@ -51,7 +51,7 @@ def handle_repo(git_obj,FORCE_CHECKOUT):
         git_obj.checkout_branch(git_obj.local_base_branch)
         git_obj.delete_branch(MEGE_BRANCH_NAME)
 
-    if git_obj.create_branch(MEGE_BRANCH_NAME) != (0,None):
+    if git_obj.checkout_branch(MEGE_BRANCH_NAME) != (0,None):
         print(f"\n    Error creating {MEGE_BRANCH_NAME}. Exiting")
         return (1,f"\n    Error creating {MEGE_BRANCH_NAME}. Exiting")
 
