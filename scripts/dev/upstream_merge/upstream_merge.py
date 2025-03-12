@@ -5,7 +5,7 @@ from GitRepo import *
 from Git_commands import *
 
 REMOTE_REPO_NAME = "automerge_upstream"
-MEGE_BRANCH_NAME = "dev/automerge/ni"
+MERGE_BRANCH_NAME = "dev/automerge/ni"
 LOCAL_FORK_NAME = "myfork"
 
 LOG_FILE = "merge_log.txt"
@@ -47,13 +47,13 @@ def handle_repo(git_obj,FORCE_CHECKOUT):
         print(f"\n    Error fetching {git_obj.upstream_branch} from {REMOTE_REPO_NAME}. Exiting")
         return (1,f"\n    Error fetching {git_obj.upstream_branch} from {REMOTE_REPO_NAME}. Exiting")
 
-    if git_obj.branch_exists(MEGE_BRANCH_NAME):
+    if git_obj.branch_exists(MERGE_BRANCH_NAME):
         git_obj.checkout_branch(git_obj.local_base_branch)
-        git_obj.delete_branch(MEGE_BRANCH_NAME)
+        git_obj.delete_branch(MERGE_BRANCH_NAME)
 
-    if git_obj.checkout_branch(MEGE_BRANCH_NAME) != (0,None):
-        print(f"\n    Error creating {MEGE_BRANCH_NAME}. Exiting")
-        return (1,f"\n    Error creating {MEGE_BRANCH_NAME}. Exiting")
+    if git_obj.checkout_branch(MERGE_BRANCH_NAME) != (0,None):
+        print(f"\n    Error creating {MERGE_BRANCH_NAME}. Exiting")
+        return (1,f"\n    Error creating {MERGE_BRANCH_NAME}. Exiting")
 
     commit_before_merge = git_obj.get_current_commit()
     
@@ -69,15 +69,15 @@ def handle_repo(git_obj,FORCE_CHECKOUT):
                 print(f"\n    Error adding remote repository {git_obj.myfork_name} using {git_obj.myfork_url}. Exiting")
                 return (1,f"\n    Error adding remote repository {git_obj.myfork_name} using {git_obj.myfork_url}. Exiting")
             
-            if git_obj.push(MEGE_BRANCH_NAME, LOCAL_FORK_NAME,delete=True)[0] != 0:
-                print(f"\n    Failed to delete branch {MEGE_BRANCH_NAME} on {LOCAL_FORK_NAME}")
-                return (1, f"\n    Failed to delete branch {MEGE_BRANCH_NAME} on {LOCAL_FORK_NAME}")
+            if git_obj.push(MERGE_BRANCH_NAME, LOCAL_FORK_NAME,delete=True)[0] != 0:
+                print(f"\n    Failed to delete branch {MERGE_BRANCH_NAME} on {LOCAL_FORK_NAME}")
+                return (1, f"\n    Failed to delete branch {MERGE_BRANCH_NAME} on {LOCAL_FORK_NAME}")
             
-            if git_obj.push(MEGE_BRANCH_NAME, LOCAL_FORK_NAME)[0] != 0:
-                print(f"\n    Failed to push branch {MEGE_BRANCH_NAME} to {LOCAL_FORK_NAME}")
-                return (1, f"\n    Failed to push branch {MEGE_BRANCH_NAME} to {LOCAL_FORK_NAME}")
+            if git_obj.push(MERGE_BRANCH_NAME, LOCAL_FORK_NAME)[0] != 0:
+                print(f"\n    Failed to push branch {MERGE_BRANCH_NAME} to {LOCAL_FORK_NAME}")
+                return (1, f"\n    Failed to push branch {MERGE_BRANCH_NAME} to {LOCAL_FORK_NAME}")
             
-            # if git_obj.create_pull_request("Automated Merge PR","Testing",git_obj.local_base_branch,f"Shreejit-03:{MEGE_BRANCH_NAME}")[0] != 0:
+            # if git_obj.create_pull_request("Automated Merge PR","Testing",git_obj.local_base_branch,f"Shreejit-03:{MERGE_BRANCH_NAME}")[0] != 0:
             #     print("\n    Error creating the pull request.")
             #     return (1,"\n    Error creating the pull request.")
             
