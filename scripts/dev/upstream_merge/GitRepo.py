@@ -7,18 +7,18 @@ class GitRepo:
         self.local_base_branch = local_base_branch
         self.upstream_branch = upstream_branch
         self.upstream_repo_url = upstream_repo_url
-        self.remote_repo_name = remote_repo_name
+        self.upstream_repo_name = remote_repo_name
         self.myfork_name = myfork_name
         self.myfork_url = myfork_url
     
     
     def get_current_commit(self):
         """Get the current HEAD commit hash."""
-        return run_command("git rev-parse HEAD", capture_output=True)[1]
+        return get_current_commit()[1]
     
     def branch_exists(self,branch_name):
         """Check if a branch exists locally."""
-        return run_command(f"git rev-parse --verify {branch_name}")[0] == 0
+        return branch_exists(branch_name)
     
     def checkout_branch(self,branch_name):
         """Switch to the given branch."""
