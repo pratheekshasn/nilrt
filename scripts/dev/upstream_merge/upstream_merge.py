@@ -77,7 +77,7 @@ def handle_repo(git_obj,FORCE_CHECKOUT):
                 print(f"\n    Failed to push branch {MEGE_BRANCH_NAME} to {LOCAL_FORK_NAME}")
                 return (1, f"\n    Failed to push branch {MEGE_BRANCH_NAME} to {LOCAL_FORK_NAME}")
             
-            # if git_obj.create_pull_request("\'Automated Merge PR\'","Testing",git_obj.local_base_branch,f"Shreejit-03:{MEGE_BRANCH_NAME}")[0] != 0:
+            # if git_obj.create_pull_request("Automated Merge PR","Testing",git_obj.local_base_branch,f"Shreejit-03:{MEGE_BRANCH_NAME}")[0] != 0:
             #     print("\n    Error creating the pull request.")
             #     return (1,"\n    Error creating the pull request.")
             
