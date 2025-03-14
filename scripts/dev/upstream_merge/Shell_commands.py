@@ -1,7 +1,7 @@
 import subprocess
 import shlex
 
-def run_command(command, capture_output=False):
+def run_command(command, capture_output=True):
     """
     Run a shell command and optionally capture the output.
     

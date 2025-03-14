@@ -1,64 +1,27 @@
 {
     "conf_file_path": "/home/tonks/dev/nilrt/scripts/dev/upstream_merge/repos.conf",
     "force_checkout": false,
-    "forks": [
-        {
-            "name": "sources/bitbake",
-            "url": "https://github.com/Shreejit-03/bitbake.git"
+    "forks":
+    {
+            "sources/bitbake": "https://github.com/Shreejit-03/bitbake.git",
+            "sources/meta-cloud-services": "https://github.com/Shreejit-03/meta-cloud-services.git",
+            "sources/meta-openembedded": "https://github.com/Shreejit-03/meta-openembedded.git",
+            "sources/meta-selinux": "https://github.com/Shreejit-03/meta-selinux.git",
+            "sources/openembedded-core": "https://github.com/Shreejit-03/openembedded-core.git",
+            "sources/meta-virtualization": "https://github.com/Shreejit-03/meta-virtualization.git",
+            "sources/meta-security": "https://github.com/Shreejit-03/meta-security.git",
+            "sources/meta-sdr": "https://github.com/Shreejit-03/meta-sdr.git",
+            "sources/meta-qt5": "https://github.com/Shreejit-03/meta-qt5.git",
+            "sources/meta-qt5-extra": "https://github.com/Shreejit-03/meta-qt5-extra.git",
+            "sources/meta-rauc": "https://github.com/Shreejit-03/meta-rauc.git",
+            "sources/pyrex": "https://github.com/Shreejit-03/pyrex.git",
+            "sources/meta-mingw": "https://github.com/Shreejit-03/meta-mingw.git"
         },
-        {
-            "name": "sources/meta-cloud-services",
-            "url": "https://github.com/Shreejit-03/meta-cloud-services.git"
-        },
-        {
-            "name": "sources/meta-openembedded",
-            "url": "https://github.com/Shreejit-03/meta-openembedded.git"
-        },
-        {
-            "name": "sources/meta-selinux",
-            "url": "https://github.com/Shreejit-03/meta-selinux.git"
-        },
-        {
-            "name": "sources/openembedded-core",
-            "url": "https://github.com/Shreejit-03/openembedded-core.git"
-        },
-        {
-            "name": "sources/meta-virtualization",
-            "url": "https://github.com/Shreejit-03/meta-virtualization.git"
-        },
-        {
-            "name": "sources/meta-security",
-            "url": "https://github.com/Shreejit-03/meta-security.git"
-        },
-        {
-            "name": "sources/meta-sdr",
-            "url": "https://github.com/Shreejit-03/meta-sdr.git"
-        },
-        {
-            "name": "sources/meta-qt5",
-            "url": "https://github.com/Shreejit-03/meta-qt5.git"
-        },
-        {
-            "name": "sources/meta-qt5-extra",
-            "url": "https://github.com/Shreejit-03/meta-qt5-extra.git"
-        },
-        {
-            "name": "sources/meta-rauc",
-            "url": "https://github.com/Shreejit-03/meta-rauc.git"
-        },
-        {
-            "name": "sources/pyrex",
-            "url": "https://github.com/Shreejit-03/pyrex.git"
-        },
-        {
-            "name": "sources/meta-mingw",
-            "url": "https://github.com/Shreejit-03/meta-mingw.git"
-        }
-    ],
-    "remote_repo_name": "automerge_upstream",
+    "upstream_repo_name": "automerge_upstream",
     "merge_branch_name": "dev/automerge/ni",
     "email_from": "shreejit.c@emerson.com",
     "email_to": "shreejit.c@emerson.com",
     "log_file_name": "merge_log.txt",
-    "log_level": "0 or 1"
+    "log_level": 1,
+    "work_item_id": 2951036
 }

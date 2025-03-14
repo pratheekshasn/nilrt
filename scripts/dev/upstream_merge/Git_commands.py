@@ -7,7 +7,10 @@ def git_clone(repo, directory=None, depth=None, capture_output=True):
     return run_command(command, capture_output)
 
 def git_commit(message, amend=False, capture_output=True):
-    command = "git commit --amend -m \"{message}\"" if amend else f"git commit -m \"{message}\""
+    if amend:
+        command = "git commit --amend -m \"{message}\"" 
+    else:
+        command = f"git commit -m \"{message}\""
     return run_command(command, capture_output)
 
 def get_current_commit(capture_output=True):
