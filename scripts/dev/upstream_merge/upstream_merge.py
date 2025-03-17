@@ -3,6 +3,7 @@ import argparse
 import json
 from GitRepo import *
 from Git_commands import *
+from Shell_commands import *
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Automated repository merging script")
@@ -92,7 +93,7 @@ def merge_upstream(git_obj,force_checkout, merge_branch_name, work_item_id):
             return (0,None)
         else:
             push_and_PR_result = push_and_PR(git_obj,merge_branch_name,work_item_id)
-            if push_and_PR_result[0] != 0:
+            if push_and_PR_result[0] == 1:
                 return push_and_PR_result
             else:
                 return (0,diff_output[1])
@@ -112,19 +113,10 @@ def push_and_PR(git_obj,merge_branch_name,work_item_id):
         print(f"\n    Failed to push branch {merge_branch_name} to {git_obj.myfork_name}")
         return (1, f"\n    Failed to push branch {merge_branch_name} to {git_obj.myfork_name}")
     
-    print(f"""Merge latest from upstream. No conflicts.
- 
-[#AB{work_item_id}](https://ni.visualstudio.com/DevCentral/_workitems/edit/2951036/)
- 
-- [ ] bitbake packagefeed-ni-core
-- [ ] bitbake packagegroup-ni-desirable
-- [ ] bitbake package-index && bitbake nilrt-base-system-image
-- [ ] Reimaged a cRIO with the new base image and successfully booted it""")
-    
     #if git_obj.create_pull_request("Automated Merge PR",
 #       f"""Merge latest from upstream. No conflicts.
  
-    # [#AB{work_item_id}](https://ni.visualstudio.com/DevCentral/_workitems/edit/2951036/)
+    # #AB{work_item_id}
     
     # - [ ] bitbake packagefeed-ni-core
     # - [ ] bitbake packagegroup-ni-desirable
@@ -142,18 +134,25 @@ def write_email_addresses(log_file_name, email_from, email_to):
         log.write("Subject: Merge Details\n\n")
 
 # Return a formatted string with the contents of the merge_report dictionary
-def format_merge_report(merge_report):
-    formatted_string = ""
+def format_merge_report(merge_report,log_level):
+    min_detail = ""
+    additional_detail = ""
     for local_repo, (status, message) in merge_report.items():
-        formatted_string += f"{local_repo}\n"
+        min_detail += f"{local_repo}\n"
+        additional_detail += f"{local_repo}\n"
         if status==1:
-            formatted_string += " ... ERRORS\n"
+            min_detail += " ... ERRORS\n"
+            additional_detail += f" ... ERRORS\n    {message}\n"
         else:
             if message == None:
-                formatted_string += " ... OK (no changes)\n"
+                min_detail += " ... OK (no changes)\n"
+                additional_detail += " ... OK (no changes)\n"
             else:
-                formatted_string += " ... OK\n"
-    return formatted_string
+                min_detail += " ... OK\n"
+                additional_detail += f" ... OK\n    {message}\n"
+    if log_level == 0:
+        return min_detail
+    return min_detail + "\n\n" + additional_detail
 
 def merge_submodules_with_upstream(conf_file, force_checkout, forks, upstream_repo_name, merge_branch_name, work_item_id):
     current_directory = os.getcwd()
@@ -182,18 +181,37 @@ def write_log(log_file_name, contents):
         log.write(contents)
 
 def write_log_and_send_email(log_file_name, email_from, email_to, merge_report, log_level):
-    formatted_report_string = format_merge_report(merge_report)
+    formatted_report_string = format_merge_report(merge_report,log_level)
     # Write the formatted report to a log file, as well as send it as an email.
     write_email_addresses(log_file_name, email_from, email_to)
     write_log(log_file_name, formatted_report_string)
     send_email(to=email_to, subject="Merge Details", file=log_file_name)
 
+def build():
+    docker = run_command("bash ./docker/create-build-nilrt.sh")
+    if docker[0] == 1:
+        return docker
+    
+    source_oe_env = run_command("bash ./ni-oe-init-build-env --org")
+    if source_oe_env[0] == 1:
+        return source_oe_env
+    
+    core_feeds = run_command("bash ../scripts/pipelines/build.core-feeds.sh")
+    if core_feeds[0] == 1:
+        return core_feeds
+    
+    build_images = run_command("bitbake nilrt-safemode-rootfs && bitbake nilrt-base-system-image && bitbake nilrt-recovery-media")
+    if build_images[0] == 1:
+        return build_images
+
+    return (0,None)
 def main():
     conf_file, force_checkout, forks, upstream_repo_name, merge_branch_name, email_from, email_to, log_file_name, log_level, work_item_id = parse_args()
     merge_report = merge_submodules_with_upstream(conf_file, force_checkout, forks, upstream_repo_name, merge_branch_name, work_item_id)
 
     # Build the base-system-image
-    # success=build()
+    success=build()
+    print(success)
     # If not successful, do not push, and send an email about the build failure
     # Test the new image
     # success = success and test()
