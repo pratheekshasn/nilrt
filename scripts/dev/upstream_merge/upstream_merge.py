@@ -192,19 +192,35 @@ def build():
     if docker[0] == 1:
         return docker
     
-    source_oe_env = run_command("bash ./ni-oe-init-build-env --org")
+    source_oe_env = run_command("source ni-oe-init-build-env --org && pwd", shell=True, executable="/bin/bash", capture_output=True)
     if source_oe_env[0] == 1:
         return source_oe_env
-    
+    print(source_oe_env)
+    os.chdir(os.getcwd() + "/build")
+
     core_feeds = run_command("bash ../scripts/pipelines/build.core-feeds.sh")
     if core_feeds[0] == 1:
         return core_feeds
+    print(core_feeds)
+    print(os.getcwd())
     
-    build_images = run_command("bitbake nilrt-safemode-rootfs && bitbake nilrt-base-system-image && bitbake nilrt-recovery-media")
-    if build_images[0] == 1:
-        return build_images
+    safemode = run_command("bitbake nilrt-safemode-rootfs")
+    if safemode[0] == 1:
+        return safemode
+    print(safemode)
+
+    BSI = run_command("bitbake nilrt-base-system-image")
+    if BSI[0] == 1:
+        return BSI
+    print(BSI)
+
+    recovery_media = run_command("bitbake nilrt-recovery-media")
+    if recovery_media[0] == 1:
+        return recovery_media
+    print(recovery_media)
 
     return (0,None)
+
 def main():
     conf_file, force_checkout, forks, upstream_repo_name, merge_branch_name, email_from, email_to, log_file_name, log_level, work_item_id = parse_args()
     merge_report = merge_submodules_with_upstream(conf_file, force_checkout, forks, upstream_repo_name, merge_branch_name, work_item_id)
