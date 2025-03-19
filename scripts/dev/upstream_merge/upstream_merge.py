@@ -191,33 +191,34 @@ def build():
     docker = run_command("bash ./docker/create-build-nilrt.sh")
     if docker[0] == 1:
         return docker
+    print(f"Docker build successful {docker[1]}")
     
-    source_oe_env = run_command("source ni-oe-init-build-env --org && pwd", shell=True, executable="/bin/bash", capture_output=True)
+    source_oe_env = run_command("bash -c '. ni-oe-init-build-env --org'")
     if source_oe_env[0] == 1:
         return source_oe_env
-    print(source_oe_env)
+    print(f"Source OE env successful {source_oe_env[1]}")
+    
     os.chdir(os.getcwd() + "/build")
 
     core_feeds = run_command("bash ../scripts/pipelines/build.core-feeds.sh")
     if core_feeds[0] == 1:
         return core_feeds
-    print(core_feeds)
-    print(os.getcwd())
+    print(f"Core feeds build successful {core_feeds[1]}")
     
     safemode = run_command("bitbake nilrt-safemode-rootfs")
     if safemode[0] == 1:
         return safemode
-    print(safemode)
+    print(f"Safemode build successful {safemode[1]}")
 
     BSI = run_command("bitbake nilrt-base-system-image")
     if BSI[0] == 1:
         return BSI
-    print(BSI)
+    print(f"Base system image build successful {BSI[1]}")
 
     recovery_media = run_command("bitbake nilrt-recovery-media")
     if recovery_media[0] == 1:
         return recovery_media
-    print(recovery_media)
+    print(f"Recovery media build successful {recovery_media[1]}")
 
     return (0,None)
 
