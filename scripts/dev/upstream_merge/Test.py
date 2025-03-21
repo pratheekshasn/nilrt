@@ -1,9 +1,9 @@
 from Shell_commands import *
 import time
 
-def Test():
+def Test(VM_name):
     print("Starting the VM...")
-    start = execute('VBoxManage startvm "NILRTAgain" --type headless')
+    start = execute(f"VBoxManage startvm \"{VM_name}\" --type headless")
     if start[0] != 0:
         print(start)    
         return start
@@ -42,7 +42,7 @@ def Test():
     
     
     print("Powering off the VM...")
-    poweroff = execute('VBoxManage controlvm "NILRTAgain" poweroff')
+    poweroff = execute(f"VBoxManage controlvm \"{VM_name}\" poweroff")
     if poweroff[0] != 0:
         print(poweroff)
         return poweroff
@@ -54,6 +54,3 @@ def Test():
         return restore
 
     return (0, None)
-
-if __name__ == "__main__":
-    Test()

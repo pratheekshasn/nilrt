@@ -47,6 +47,3 @@ def build():
     print("\nRecovery media build completed.\n")
 
     return (0, None)
-
-if __name__ == "__main__":
-    build()

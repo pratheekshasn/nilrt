@@ -20,7 +20,7 @@ def parse_args():
         print(f"Error loading config file: {e}")
         exit(1)
     
-    return config.get("conf_file_path"), config.get("force_checkout"), config.get("forks"), config.get("upstream_repo_name"), config.get("merge_branch_name"), config.get("email_from"), config.get("email_to"), config.get("log_file_name"), config.get("log_level"), config.get("work_item_id")
+    return config.get("conf_file_path"), config.get("force_checkout"), config.get("forks"), config.get("upstream_repo_name"), config.get("merge_branch_name"), config.get("email_from"), config.get("email_to"), config.get("log_file_name"), config.get("log_level"), config.get("work_item_id"), config.get("VM_name")
 
 def switch_to_base_branch_and_pull(git_obj,force_checkout):
     if not force_checkout and not git_obj.branch_exists(git_obj.local_base_branch):
@@ -190,20 +190,20 @@ def write_log_and_send_email(log_file_name, email_from, email_to, merge_report, 
     write_log(log_file_name, formatted_report_string)
     send_email(to=email_to, subject="Merge Details", file=log_file_name)
 
-def Build_and_Test():
+def Build_and_Test(vm_name):
     success=build()
     if success[0] != 0:
         return success
-    success=Test()
+    success=Test(vm_name)
     if success[0] != 0:
         return success
     return (0,None)
 
 def main():
-    conf_file, force_checkout, forks, upstream_repo_name, merge_branch_name, email_from, email_to, log_file_name, log_level, work_item_id = parse_args()
+    conf_file, force_checkout, forks, upstream_repo_name, merge_branch_name, email_from, email_to, log_file_name, log_level, work_item_id, vm_name = parse_args()
     merge_report = merge_submodules_with_upstream(conf_file, force_checkout, forks, upstream_repo_name, merge_branch_name, work_item_id)
 
-    details = Build_and_Test()
+    details = Build_and_Test(vm_name)
     if details[0] != 0:
         merge_report["Build_and_Test"] = details
     else:
