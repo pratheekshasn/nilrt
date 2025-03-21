@@ -1,9 +1,12 @@
 import os
+import time
 import argparse
 import json
 from GitRepo import *
 from Git_commands import *
 from Shell_commands import *
+from Test import *
+from Build import *
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Automated repository merging script")
@@ -187,48 +190,25 @@ def write_log_and_send_email(log_file_name, email_from, email_to, merge_report, 
     write_log(log_file_name, formatted_report_string)
     send_email(to=email_to, subject="Merge Details", file=log_file_name)
 
-def build():
-    docker = run_command("bash ./docker/create-build-nilrt.sh")
-    if docker[0] == 1:
-        return docker
-    print(f"Docker build successful {docker[1]}")
-    
-    source_oe_env = run_command("bash -c '. ni-oe-init-build-env --org'")
-    if source_oe_env[0] == 1:
-        return source_oe_env
-    print(f"Source OE env successful {source_oe_env[1]}")
-    
-    os.chdir(os.getcwd() + "/build")
-
-    core_feeds = run_command("bash ../scripts/pipelines/build.core-feeds.sh")
-    if core_feeds[0] == 1:
-        return core_feeds
-    print(f"Core feeds build successful {core_feeds[1]}")
-    
-    safemode = run_command("bitbake nilrt-safemode-rootfs")
-    if safemode[0] == 1:
-        return safemode
-    print(f"Safemode build successful {safemode[1]}")
-
-    BSI = run_command("bitbake nilrt-base-system-image")
-    if BSI[0] == 1:
-        return BSI
-    print(f"Base system image build successful {BSI[1]}")
-
-    recovery_media = run_command("bitbake nilrt-recovery-media")
-    if recovery_media[0] == 1:
-        return recovery_media
-    print(f"Recovery media build successful {recovery_media[1]}")
-
+def Build_and_Test():
+    success=build()
+    if success[0] != 0:
+        return success
+    success=Test()
+    if success[0] != 0:
+        return success
     return (0,None)
 
 def main():
     conf_file, force_checkout, forks, upstream_repo_name, merge_branch_name, email_from, email_to, log_file_name, log_level, work_item_id = parse_args()
     merge_report = merge_submodules_with_upstream(conf_file, force_checkout, forks, upstream_repo_name, merge_branch_name, work_item_id)
 
+    details = Build_and_Test()
+    if details[0] != 0:
+        merge_report["Build_and_Test"] = details
+    else:
+        merge_report["Build_and_Test"] = (0,"Build and Test successful")
     # Build the base-system-image
-    success=build()
-    print(success)
     # If not successful, do not push, and send an email about the build failure
     # Test the new image
     # success = success and test()

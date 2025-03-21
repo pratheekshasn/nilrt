@@ -14,8 +14,6 @@ def run_command(command, capture_output=True):
     try:
         if capture_output:
             result = subprocess.run(formatted_command, capture_output=True, text=True, check=False)
-            print(command)
-            print(result.stderr.strip())
             return result.returncode, result.stdout.strip()
         else:
             result = subprocess.run(formatted_command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -30,26 +28,22 @@ def execute(command):
     :param command: Command to execute as a string.
     :yield: Lines of output from the command.
     """
-    process = subprocess.Popen(
-        command,
-        shell=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        universal_newlines=True  # Ensures output is decoded into strings
-    )
+    try:
+        process = subprocess.Popen(
+            command,
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            universal_newlines=True 
+        )
 
-    # Poll process for new output until finished
-    while True:
-        nextline = process.stdout.readline()
-        if nextline == '' and process.poll() is not None:
-            break
-        sys.stdout.write(nextline)  # Write the line to stdout
-        sys.stdout.flush()
+        while True:
+            nextline = process.stdout.readline()
+            if nextline == '' and process.poll() is not None:
+                break
+            sys.stdout.write(nextline)
+            sys.stdout.flush()
 
-    output = process.communicate()[0]
-    exitCode = process.returncode
-
-    if exitCode == 0:
-        return exitCode, output
-    else:
-        raise subprocess.CalledProcessError(exitCode, command, output=output)
+        return process.returncode, process.communicate()[0]
+    except Exception as e:
+        return 1, f"Error running command '{command}': {str(e)}"

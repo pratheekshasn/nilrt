@@ -2,37 +2,49 @@ from Shell_commands import *
 import os
 
 def build():
-    print("Starting Docker setup...")
-    for line in execute("bash ./docker/create-build-nilrt.sh"):
-        print(line)
-    print("Docker setup completed.")
+    print("\nStarting Docker setup...\n")
+    docker = execute("bash ./docker/create-build-nilrt.sh")
+    if docker[0] != 0:
+        print(docker)
+        return docker
+    print("\nDocker setup completed.")
     
-    print("Sourcing OE environment...")
-    for line in execute("bash -c '. ni-oe-init-build-env --org'"):
-        print(line)
-    print("OE environment sourced.")
+    print("\nSourcing OE environment...\n")
+    source = execute("bash -c '. ni-oe-init-build-env --org'")
+    if source[0] != 0:
+        print(source)
+        return source
+    print("\nOE environment sourced.\n")
     
     os.chdir(os.getcwd() + "/build")
 
-    print("Building core feeds...")
-    for line in execute("bash ../scripts/pipelines/build.core-feeds.sh"):
-        print(line)
-    print("Core feeds build completed.")
-    
-    print("Building safemode rootfs...")
-    for line in execute("bitbake nilrt-safemode-rootfs"):
-        print(line)
-    print("Safemode rootfs build completed.")
+    print("\nBuilding core feeds...\n")
+    core_feeds = execute("bash ../scripts/pipelines/build.core-feeds.sh")
+    if core_feeds[0] != 0:
+        print(core_feeds)
+        return core_feeds
+    print("\nCore feeds build completed.\n")
 
-    print("Building base system image...")
-    for line in execute("bitbake nilrt-base-system-image"):
-        print(line)
-    print("Base system image build completed.")
+    print("\nBuilding safemode rootfs...\n")
+    safemode = execute("bitbake nilrt-safemode-rootfs")
+    if safemode[0] != 0:
+        print(safemode)
+        return safemode
+    print("\nSafemode rootfs build completed.\n")
 
-    print("Building recovery media...")
-    for line in execute("bitbake nilrt-recovery-media"):
-        print(line)
-    print("Recovery media build completed.")
+    print("\nBuilding base system image...\n")
+    BSI = execute("bitbake nilrt-base-system-image")
+    if BSI[0] != 0:
+        print(BSI)
+        return BSI
+    print("\nBase system image build completed.\n")
+
+    print("\nBuilding recovery media...\n")
+    recovery = execute("bitbake nilrt-recovery-media")
+    if recovery[0] != 0:
+        print(recovery)
+        return recovery
+    print("\nRecovery media build completed.\n")
 
     return (0, None)
 
