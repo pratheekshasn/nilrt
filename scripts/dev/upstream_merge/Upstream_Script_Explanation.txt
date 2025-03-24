@@ -20,6 +20,7 @@ main():
     
     write_log_and_send_email():
         format_merge_report():
+            push_and_PR()://Incase of ... OK the branch is pushed to your repository and then a PR is created
         write_email_addresses():
         write_log():
         send_email():
