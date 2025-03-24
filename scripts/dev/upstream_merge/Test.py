@@ -1,7 +1,7 @@
 from Shell_commands import *
 import time
 
-def Test(VM_name):
+def test(VM_name):
     print("Starting the VM...")
     start = execute(f"VBoxManage startvm \"{VM_name}\" --type headless")
     if start[0] != 0:

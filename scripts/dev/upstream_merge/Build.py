@@ -1,5 +1,4 @@
 from Shell_commands import *
-import os
 
 def build():
     print("\nStarting Docker setup...\n")
@@ -15,11 +14,9 @@ def build():
         print(source)
         return source
     print("\nOE environment sourced.\n")
-    
-    os.chdir(os.getcwd() + "/build")
 
     print("\nBuilding core feeds...\n")
-    core_feeds = execute("bash ../scripts/pipelines/build.core-feeds.sh")
+    core_feeds = execute("bash scripts/pipelines/build.core-feeds.sh")
     if core_feeds[0] != 0:
         print(core_feeds)
         return core_feeds

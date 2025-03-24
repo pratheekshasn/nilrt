@@ -1,5 +1,4 @@
 import os
-import time
 import argparse
 import json
 from GitRepo import *
@@ -7,6 +6,10 @@ from Git_commands import *
 from Shell_commands import *
 from Test import *
 from Build import *
+
+Submodule_merge_Flag = False
+Build_Flag = False
+Test_Flag = False
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Automated repository merging script")
@@ -48,7 +51,7 @@ def fetch_upstream(git_obj):
 
     return (0,None)
 
-def get_merge_branch(git_obj,merge_branch_name):
+def create_merge_branch(git_obj,merge_branch_name):
     if git_obj.branch_exists(merge_branch_name):
         git_obj.checkout_branch(git_obj.local_base_branch)
         git_obj.delete_branch(merge_branch_name)
@@ -61,9 +64,8 @@ def get_merge_branch(git_obj,merge_branch_name):
 
 def merge_prepare(git_obj, merge_branch_name, force_checkout):
     print(f"{git_obj.local_repo}")
-
+    
     base_branch_details = switch_to_base_branch_and_pull(git_obj,force_checkout)
-
     if base_branch_details[0]==1:
         return base_branch_details
     
@@ -72,14 +74,14 @@ def merge_prepare(git_obj, merge_branch_name, force_checkout):
     if fetch_details[0]==1:
         return fetch_details
     
-    repo_details = get_merge_branch(git_obj, merge_branch_name)
+    repo_details = create_merge_branch(git_obj, merge_branch_name)
 
     if repo_details[0]==1:
         return repo_details
     
     return (0,None)
 
-def merge_upstream(git_obj,force_checkout, merge_branch_name, work_item_id):
+def merge_upstream(git_obj,force_checkout, merge_branch_name):
     merge_prepare_details = merge_prepare(git_obj,merge_branch_name,force_checkout)
     
     if merge_prepare_details[0]==1:
@@ -95,11 +97,7 @@ def merge_upstream(git_obj,force_checkout, merge_branch_name, work_item_id):
         if (git_obj.get_current_commit() == commit_before_merge) or diff_output == (0,None):
             return (0,None)
         else:
-            push_and_PR_result = push_and_PR(git_obj,merge_branch_name,work_item_id)
-            if push_and_PR_result[0] == 1:
-                return push_and_PR_result
-            else:
-                return (0,diff_output[1])
+            return (0,diff_output[1])
     else:
         return (1,merge_result[1])
 
@@ -136,13 +134,13 @@ def write_email_addresses(log_file_name, email_from, email_to):
         log.write(f"To: {email_to}\n")
         log.write("Subject: Merge Details\n\n")
 
-# Return a formatted string with the contents of the merge_report dictionary
-def format_merge_report(merge_report,log_level):
+def format_merge_report(merge_report,log_level, merge_branch_name, work_item_id):
     min_detail = ""
     additional_detail = ""
-    for local_repo, (status, message) in merge_report.items():
-        min_detail += f"{local_repo}\n"
-        additional_detail += f"{local_repo}\n"
+    build_and_test_detail = merge_report.pop("Build_and_Test")
+    for git_obj, (status, message) in merge_report.items():
+        min_detail += f"{git_obj.local_repo}\n"
+        additional_detail += f"{git_obj.local_repo}\n"
         if status==1:
             min_detail += " ... ERRORS\n"
             additional_detail += f" ... ERRORS\n    {message}\n"
@@ -153,11 +151,29 @@ def format_merge_report(merge_report,log_level):
             else:
                 min_detail += " ... OK\n"
                 additional_detail += f" ... OK\n    {message}\n"
+                if Build_Flag and Test_Flag:
+                    current_directory = os.getcwd()
+                    os.chdir(git_obj.local_repo)
+                    push_and_PR_result = push_and_PR(git_obj,merge_branch_name,work_item_id)
+                    os.chdir(current_directory)
+                    if push_and_PR_result[0] == 1:
+                        min_detail += " ... ERRORS\n"
+                        additional_detail += f" ... ERRORS\n    {push_and_PR_result[1]}\n"
+                    else:
+                        min_detail += " ... PUSH SUCCESSFUL\n"
+                        additional_detail += f" ... PUSH SUCCESSFUL\n    {push_and_PR_result[1]}\n"
+
+    min_detail += f"\nBuild and Test\n"
+    if build_and_test_detail[0] == 0:
+        min_detail += " ... OK\n"
+    else:
+        min_detail += " ... ERRORS\n"
+        additional_detail += f"\nBuild and Test\n ... ERRORS\n    {build_and_test_detail[1]}\n"
     if log_level == 0:
         return min_detail
     return min_detail + "\n\n" + additional_detail
 
-def merge_submodules_with_upstream(conf_file, force_checkout, forks, upstream_repo_name, merge_branch_name, work_item_id):
+def merge_submodules_with_upstream(conf_file, force_checkout, forks, upstream_repo_name, merge_branch_name):
     current_directory = os.getcwd()
 
     # Merge each submodule
@@ -175,7 +191,9 @@ def merge_submodules_with_upstream(conf_file, force_checkout, forks, upstream_re
                             myfork_name="myfork",
                             myfork_url=forks[parts[0]])
             os.chdir(git_obj.local_repo)
-            merge_report[parts[0]] = merge_upstream(git_obj, force_checkout, merge_branch_name, work_item_id)
+            merge_report[git_obj] = merge_upstream(git_obj, force_checkout, merge_branch_name)
+            if merge_report[git_obj][0] == 1:
+                Submodule_merge_Flag = True 
             os.chdir(current_directory)
     return merge_report
 
@@ -183,9 +201,8 @@ def write_log(log_file_name, contents):
     with open(log_file_name, "a") as log:
         log.write(contents)
 
-def write_log_and_send_email(log_file_name, email_from, email_to, merge_report, log_level):
-    formatted_report_string = format_merge_report(merge_report,log_level)
-    # Write the formatted report to a log file, as well as send it as an email.
+def write_log_and_send_email(log_file_name, email_from, email_to, merge_report, log_level, merge_branch_name, work_item_id):
+    formatted_report_string = format_merge_report(merge_report,log_level, merge_branch_name, work_item_id)
     write_email_addresses(log_file_name, email_from, email_to)
     write_log(log_file_name, formatted_report_string)
     send_email(to=email_to, subject="Merge Details", file=log_file_name)
@@ -194,29 +211,31 @@ def Build_and_Test(vm_name):
     success=build()
     if success[0] != 0:
         return success
-    success=Test(vm_name)
+    Build_Flag = True
+    success=test(vm_name)
     if success[0] != 0:
         return success
+    Test_Flag = True
     return (0,None)
 
 def main():
     conf_file, force_checkout, forks, upstream_repo_name, merge_branch_name, email_from, email_to, log_file_name, log_level, work_item_id, vm_name = parse_args()
-    merge_report = merge_submodules_with_upstream(conf_file, force_checkout, forks, upstream_repo_name, merge_branch_name, work_item_id)
-
-    details = Build_and_Test(vm_name)
-    if details[0] != 0:
-        merge_report["Build_and_Test"] = details
-    else:
-        merge_report["Build_and_Test"] = (0,"Build and Test successful")
+    merge_report = merge_submodules_with_upstream(conf_file, force_checkout, forks, upstream_repo_name, merge_branch_name)
+    
+    if Submodule_merge_Flag == False:
+        details = Build_and_Test(vm_name)
+        if details[0] != 0:
+            merge_report["Build_and_Test"] = details
+        else:
+            merge_report["Build_and_Test"] = (0,"Build and Test successful")
     # Build the base-system-image
     # If not successful, do not push, and send an email about the build failure
     # Test the new image
     # success = success and test()
     # If not successful, do not push, and send an email about the test failure
-
     # If both are successful, push branch, create PR, send email with diff.
 
-    write_log_and_send_email(log_file_name, email_from, email_to, merge_report, log_level)
+    write_log_and_send_email(log_file_name, email_from, email_to, merge_report, log_level, merge_branch_name, work_item_id)
     
 
 if __name__ == "__main__":
