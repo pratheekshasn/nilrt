@@ -7,13 +7,6 @@ def build():
         print(docker)
         return docker
     print("\nDocker setup completed.")
-    
-    print("\nSourcing OE environment...\n")
-    source = execute("bash -c '. ni-oe-init-build-env --org'")
-    if source[0] != 0:
-        print(source)
-        return source
-    print("\nOE environment sourced.\n")
 
     print("\nBuilding core feeds...\n")
     core_feeds = execute("bash scripts/pipelines/build.core-feeds.sh")
@@ -22,25 +15,11 @@ def build():
         return core_feeds
     print("\nCore feeds build completed.")
 
-    print("\nBuilding safemode rootfs...\n")
-    safemode = execute("bitbake nilrt-safemode-rootfs")
-    if safemode[0] != 0:
-        print(safemode)
-        return safemode
-    print("\nSafemode rootfs build completed.")
-
-    print("\nBuilding base system image...\n")
-    BSI = execute("bitbake nilrt-base-system-image")
-    if BSI[0] != 0:
-        print(BSI)
-        return BSI
-    print("\nBase system image build completed.")
-
-    print("\nBuilding recovery media...\n")
-    recovery = execute("bitbake nilrt-recovery-media")
-    if recovery[0] != 0:
-        print(recovery)
-        return recovery
-    print("\nRecovery media build completed.")
+    print("\nBuilding core images...\n")
+    core_images = execute("bash scripts/pipelines/build.core-images.sh")
+    if core_images[0] != 0:
+        print(core_images)
+        return core_images
+    print("\nCore images build completed.")
 
     return (0, None)

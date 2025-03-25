@@ -10,7 +10,7 @@ def run_command(command, capture_output=True):
     :param capture_output: Whether to capture the output.
     :return: (return_code, output) - return code and output string (or None if not captured).
     """
-    print(command,end='\n')
+    print(command)
     formatted_command = shlex.split(command)
     try:
         if capture_output:
@@ -29,7 +29,7 @@ def execute(command):
     :param command: Command to execute as a string.
     :yield: Lines of output from the command.
     """
-    print(command,end='\n')
+    print(command)
     try:
         process = subprocess.Popen(
             command,
