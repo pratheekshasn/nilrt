@@ -64,7 +64,7 @@ def create_merge_branch(git_obj,merge_branch_name):
 
 def merge_prepare(git_obj, merge_branch_name, force_checkout):
     print(f"{git_obj.local_repo}")
-    
+
     base_branch_details = switch_to_base_branch_and_pull(git_obj,force_checkout)
     if base_branch_details[0]==1:
         return base_branch_details
@@ -173,11 +173,10 @@ def format_merge_report(merge_report,log_level, merge_branch_name, work_item_id)
         return min_detail
     return min_detail + "\n\n" + additional_detail
 
-def merge_submodules_with_upstream(conf_file, force_checkout, forks, upstream_repo_name, merge_branch_name):
+def merge_submodules_with_upstream(merge_report, conf_file, force_checkout, forks, upstream_repo_name, merge_branch_name):
     current_directory = os.getcwd()
 
-    # Merge each submodule
-    merge_report = {}
+    # Merge each submodule with upstream
     with open(conf_file, "r") as file:
         for line in file:
             if line.startswith("#"):
@@ -193,7 +192,7 @@ def merge_submodules_with_upstream(conf_file, force_checkout, forks, upstream_re
             os.chdir(git_obj.local_repo)
             merge_report[git_obj] = merge_upstream(git_obj, force_checkout, merge_branch_name)
             if merge_report[git_obj][0] == 1:
-                Submodule_merge_Flag = True 
+                Submodule_merge_Flag = True
             os.chdir(current_directory)
     return merge_report
 
@@ -220,7 +219,12 @@ def Build_and_Test(vm_name):
 
 def main():
     conf_file, force_checkout, forks, upstream_repo_name, merge_branch_name, email_from, email_to, log_file_name, log_level, work_item_id, vm_name = parse_args()
-    merge_report = merge_submodules_with_upstream(conf_file, force_checkout, forks, upstream_repo_name, merge_branch_name)
+    
+    merge_report = {}
+    
+    inp = input(f"Merge Submodules with upstream?[y/n]")
+    if inp == "y":
+        merge_report = merge_submodules_with_upstream(merge_report, conf_file, force_checkout, forks, upstream_repo_name, merge_branch_name)
     
     if Submodule_merge_Flag == False:
         details = Build_and_Test(vm_name)
@@ -237,6 +241,5 @@ def main():
 
     write_log_and_send_email(log_file_name, email_from, email_to, merge_report, log_level, merge_branch_name, work_item_id)
     
-
 if __name__ == "__main__":
     main()

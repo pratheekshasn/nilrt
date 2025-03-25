@@ -20,27 +20,27 @@ def build():
     if core_feeds[0] != 0:
         print(core_feeds)
         return core_feeds
-    print("\nCore feeds build completed.\n")
+    print("\nCore feeds build completed.")
 
     print("\nBuilding safemode rootfs...\n")
     safemode = execute("bitbake nilrt-safemode-rootfs")
     if safemode[0] != 0:
         print(safemode)
         return safemode
-    print("\nSafemode rootfs build completed.\n")
+    print("\nSafemode rootfs build completed.")
 
     print("\nBuilding base system image...\n")
     BSI = execute("bitbake nilrt-base-system-image")
     if BSI[0] != 0:
         print(BSI)
         return BSI
-    print("\nBase system image build completed.\n")
+    print("\nBase system image build completed.")
 
     print("\nBuilding recovery media...\n")
     recovery = execute("bitbake nilrt-recovery-media")
     if recovery[0] != 0:
         print(recovery)
         return recovery
-    print("\nRecovery media build completed.\n")
+    print("\nRecovery media build completed.")
 
     return (0, None)
