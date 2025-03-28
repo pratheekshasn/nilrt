@@ -2,14 +2,14 @@ from Shell_commands import *
 from Git_commands import *
 
 class GitRepo:
-    def __init__(self, local_repo, upstream_repo_url, upstream_branch, local_base_branch,upstream_repo_name,myfork_name,myfork_url):
+    def __init__(self, local_repo, upstream_repo_url, upstream_branch, local_base_branch,upstream_repo_name,fork_name,fork_url):
         self.local_repo = local_repo
         self.local_base_branch = local_base_branch
         self.upstream_branch = upstream_branch
         self.upstream_repo_url = upstream_repo_url
         self.upstream_repo_name = upstream_repo_name
-        self.myfork_name = myfork_name
-        self.myfork_url = myfork_url
+        self.fork_name = fork_name
+        self.fork_url = fork_url
 
     def get_current_commit(self):
         """Get the current HEAD commit hash."""

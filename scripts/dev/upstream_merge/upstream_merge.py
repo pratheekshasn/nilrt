@@ -23,7 +23,7 @@ def conf_details(config_file_path):
         print(f"Error loading config file: {e}")
         exit(1)
     
-    return os.getcwd()+f"/scripts/dev/upstream_merge/{config.get("conf_file_path")}", config.get("force_checkout"), config.get("forks"), config.get("upstream_repo_name"), config.get("merge_branch_name"), config.get("email_from"), config.get("email_to"), config.get("log_file_name"), config.get("log_level"), config.get("work_item_id"), config.get("VM_name")
+    return os.getcwd()+f"/{config.get("conf_file_path")}", config.get("force_checkout"), config.get("forks"), config.get("upstream_repo_name"), config.get("merge_branch_name"), config.get("email_from"), config.get("email_to"), config.get("log_file_name"), config.get("log_level"), config.get("work_item_id"), config.get("VM_name")
 
 def switch_to_base_branch_and_pull(git_obj,force_checkout):
     if not force_checkout and not git_obj.branch_exists(git_obj.local_base_branch):

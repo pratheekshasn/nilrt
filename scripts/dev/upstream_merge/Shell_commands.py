@@ -1,6 +1,10 @@
 import subprocess
 import shlex
 import sys
+import logging
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(filename='myapp.log', level=logging.INFO)
 
 def run_command(command, capture_output=True):
     """
@@ -11,15 +15,19 @@ def run_command(command, capture_output=True):
     :return: (return_code, output) - return code and output string (or None if not captured).
     """
     print(command)
+    logger.info("Running command: %s", command)
     formatted_command = shlex.split(command)
     try:
         if capture_output:
             result = subprocess.run(formatted_command, capture_output=True, text=True, check=False)
-            return result.returncode, result.stdout.strip()
+            logger.info("Command output: %s", result.stdout.strip() + result.stderr.strip())
+            return result.returncode, result.stdout.strip() + result.stderr.strip()
         else:
             result = subprocess.run(formatted_command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            logger.info("Command output: %s", result.stdout.strip() + result.stderr.strip())
             return result.returncode, None
     except Exception as e:
+        logger.info("Exception running command: %s", str(e))
         return 1, f"Error running command '{command}': {str(e)}"
     
 def execute(command):
@@ -39,13 +47,15 @@ def execute(command):
             universal_newlines=True 
         )
 
+        retval = ""
         while True:
             nextline = process.stdout.readline()
+            retval += nextline
             if nextline == '' and process.poll() is not None:
                 break
             sys.stdout.write(nextline)
             sys.stdout.flush()
 
-        return process.returncode, process.communicate()[0]
+        return process.returncode, retval
     except Exception as e:
         return 1, f"Error running command '{command}': {str(e)}"

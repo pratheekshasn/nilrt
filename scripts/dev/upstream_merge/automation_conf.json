@@ -1,5 +1,5 @@
 {
-    "conf_file_path": "/home/tonks/dev/nilrt/scripts/dev/upstream_merge/repos.conf",
+    "conf_file_path": "repos.conf",
     "force_checkout": false,
     "forks":
     {
@@ -24,5 +24,6 @@
     "log_file_name": "merge_log.txt",
     "log_level": 1,
     "work_item_id": 2951036,
-    "VM_name": "NILRTAgain"
+    "VM_name": "NILRTAgain",
+    "snapshot_name": "Clean_SSHEnabled"
 }
