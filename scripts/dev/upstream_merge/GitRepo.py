@@ -61,12 +61,12 @@ class GitRepo:
         """Pull latest changes from the current branch's remote tracking branch."""
         return git_pull(remote=upstream_repo_name, branch=branch_name,capture_output=True)
 
-    def push(self, branch_name, upstream_repo_name = None, delete = False):
+    def push(self, branch_name, upstream_repo_name = None, force = False, delete = False):
         """Push a branch to the remote repository."""
         if upstream_repo_name is None:
             upstream_repo_name = self.upstream_repo_name 
 
-        return git_push(upstream_repo_name, branch_name,delete)
+        return git_push(upstream_repo_name, branch_name, force, delete)
 
     def create_pull_request(self, title, body="", base_branch="main", head_branch=None):
         """Create a pull request on GitHub using the GitHub CLI (gh)."""

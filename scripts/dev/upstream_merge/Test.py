@@ -18,8 +18,8 @@ def test(VM_name, snapshot_name):
         return copy
     
     extract_and_install = extract_and_install_image()
-    if extract_and_install_image[0] != 0:
-        extract_and_install
+    if extract_and_install[0] != 0:
+        return extract_and_install
 
     reboot = reboot_machine()
     if reboot[0] != 0:
@@ -72,6 +72,3 @@ def verify_OS_version():
 def poweroff_VM(VM_name):
     print("Powering off the VM...")
     return execute(f"VBoxManage controlvm \"{VM_name}\" poweroff")
-
-if __name__ == "__main__":
-    test("NILRTAgain", "Clean_SSHEnabled")

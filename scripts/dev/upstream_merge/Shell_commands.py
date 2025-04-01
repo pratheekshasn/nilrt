@@ -4,7 +4,7 @@ import sys
 import logging
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(filename='myapp.log', level=logging.INFO)
+logging.basicConfig(filename='mylog.log', level=logging.INFO)
 
 def run_command(command, capture_output=True):
     """
@@ -38,6 +38,7 @@ def execute(command):
     :yield: Lines of output from the command.
     """
     print(command)
+    logger.info("Running command: %s", command)
     try:
         process = subprocess.Popen(
             command,
@@ -55,7 +56,8 @@ def execute(command):
                 break
             sys.stdout.write(nextline)
             sys.stdout.flush()
-
+        
+        logger.info("Command output: %s", retval)
         return process.returncode, retval
     except Exception as e:
         return 1, f"Error running command '{command}': {str(e)}"
