@@ -81,7 +81,10 @@ def merge_prepare(git_obj, merge_branch_name, force_checkout):
     
     return (0,None)
 
-def merge_upstream(git_obj,force_checkout, merge_branch_name):
+def merge_upstream(git_obj,force_checkout, merge_branch_name, skip_merge):
+    if skip_merge:
+        return (0," Has Been Skipped")
+    
     merge_prepare_details = merge_prepare(git_obj,merge_branch_name,force_checkout)
     
     if merge_prepare_details[0]==1:
@@ -174,7 +177,7 @@ def format_merge_report(merge_report, log_level):
         return min_detail
     return min_detail + "\n\n" + additional_detail
 
-def merge_submodules_with_upstream(merge_report, conf_file, force_checkout, forks, upstream_repo_name, merge_branch_name):
+def merge_submodules_with_upstream(merge_report, conf_file, force_checkout, forks, upstream_repo_name, merge_branch_name, skip_merge):
     current_directory = os.getcwd()
 
     # Merge each submodule with upstream
@@ -191,7 +194,7 @@ def merge_submodules_with_upstream(merge_report, conf_file, force_checkout, fork
                             fork_name="myfork",
                             fork_url=forks[parts[0]])
             os.chdir(git_obj.local_repo)
-            merge_report[git_obj] = merge_upstream(git_obj, force_checkout, merge_branch_name)
+            merge_report[git_obj] = merge_upstream(git_obj, force_checkout, merge_branch_name, skip_merge)
             os.chdir(current_directory)
     return merge_report
 
@@ -220,9 +223,7 @@ def main():
     conf_file, force_checkout, forks, upstream_repo_name, merge_branch_name, email_from, email_to, log_file_name, log_level, work_item_id, vm_name, snapshot_name = conf_details(config_file_path)
     
     merge_report = {}
-    
-    if not skip_merge:
-        merge_report = merge_submodules_with_upstream(merge_report, conf_file, force_checkout, forks, upstream_repo_name, merge_branch_name)
+    merge_report = merge_submodules_with_upstream(merge_report, conf_file, force_checkout, forks, upstream_repo_name, merge_branch_name, skip_merge)
     
     merge_has_errors = False
     
