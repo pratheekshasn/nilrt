@@ -2,10 +2,9 @@ import os
 import argparse
 import json
 from GitRepo import *
-from Git_commands import *
-from Shell_commands import *
-from Test import *
-from Build import *
+from git_commands import *
+from test import *
+from build import *
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Automated repository merging script")
@@ -23,7 +22,7 @@ def conf_details(config_file_path):
         print(f"Error loading config file: {e}")
         exit(1)
     
-    return os.getcwd()+f"/scripts/dev/upstream_merge/{config.get('conf_file_path')}", config.get("force_checkout"), config.get("forks"), config.get("upstream_repo_name"), config.get("merge_branch_name"), config.get("email_from"), config.get("email_to"), config.get("log_file_name"), config.get("log_level"), config.get("work_item_id"), config.get("VM_name"), config.get("snapshot_name")
+    return os.getcwd()+f"/scripts/dev/upstream_merge/{config.get('conf_file_path')}", config.get("force_checkout"), config.get("forks"), config.get("upstream_repo_name"), config.get("merge_branch_name"), config.get("email_from"), config.get("email_to"), config.get("log_file_name"), config.get("email_log_level"), config.get("work_item_id"), config.get("VM_name"), config.get("snapshot_name")
 
 def switch_to_base_branch_and_pull(git_obj,force_checkout):
     if not force_checkout and not git_obj.branch_exists(git_obj.local_base_branch):
@@ -145,18 +144,25 @@ def format_status(status, message):
         else:
             return " ... OK", f" ... OK\n    {message}\n"
         
-def format_merge_report(merge_report, log_level):
+def format_merge_report(merge_report, email_log_level):
     min_detail = ""
     additional_detail = ""
-
+    
+    min_detail += "\nBuild and Test\n"
     build_and_test_detail = merge_report.pop("Build and Test")
-    push_and_PR_details = merge_report.pop("Push and PR")
+    if build_and_test_detail[0] == 0:
+        min_detail += " ... OK\n"
+        additional_detail += f"\nBuild and Test\n ... OK\n    {build_and_test_detail[1]}\n"
+        push_and_PR_details = merge_report.pop("Push and PR")
+    else:
+        min_detail += " ... ERRORS\n"
+        additional_detail += f"\nBuild and Test\n ... ERRORS\n    {build_and_test_detail[1]}\n"
 
     for git_obj, (status, message) in merge_report.items():
         min_line, additional_line = format_status(status, message)
         min_detail += f"{git_obj.local_repo}\n{min_line}\n"
         additional_detail += f"{git_obj.local_repo}\n{additional_line}"
-        if status == 0 and message is not None:
+        if build_and_test_detail[0] == 0 and status == 0 and message is not None:
             git_obj_push_details = push_and_PR_details[git_obj]
             if git_obj_push_details[0] == 0:
                 min_detail += "     Push and PR ... OK\n"
@@ -164,16 +170,8 @@ def format_merge_report(merge_report, log_level):
             else:
                 min_detail += "     Push and PR ... ERRORS\n"
                 additional_detail += f" Push and PR ... ERRORS\n    {message}\n"
-    
-    min_detail += "\nBuild and Test\n"
-    if build_and_test_detail and build_and_test_detail[0] == 0:
-        min_detail += " ... OK\n"
-        additional_detail += f"\nBuild and Test\n ... OK\n    {build_and_test_detail[1]}\n"
-    else:
-        min_detail += " ... ERRORS\n"
-        additional_detail += f"\nBuild and Test\n ... ERRORS\n    {build_and_test_detail[1]}\n"
 
-    if log_level == 0:
+    if email_log_level == 0:
         return min_detail
     return min_detail + "\n\n" + additional_detail
 
@@ -202,17 +200,19 @@ def write_log(log_file_name, contents):
     with open(log_file_name, "a") as log:
         log.write(contents)
 
-def write_log_and_send_email(log_file_name, email_from, email_to, merge_report, log_level):
-    formatted_report_string = format_merge_report(merge_report,log_level)
+def write_log_and_send_email(log_file_name, email_from, email_to, merge_report, email_log_level):
+    formatted_report_string = format_merge_report(merge_report,email_log_level)
     write_email_addresses(log_file_name, email_from, email_to)
     write_log(log_file_name, formatted_report_string)
     send_email(to=email_to, subject="Merge Details", file=log_file_name)
 
-def Build_and_Test(vm_name, snapshot_name):
-    success=build()
+def Build_and_Test(vm_name, snapshot_name, merge_has_errors):
+    if merge_has_errors == True:
+        return (1,"Merge has Errors")
+    success = build_images()
     if success[0] != 0:
         return success
-    success=test(vm_name, snapshot_name)
+    success = OS_test(vm_name, snapshot_name)
     return success
 
 def main():
@@ -220,7 +220,7 @@ def main():
     skip_merge = args.skip_merge
     config_file_path = args.c
 
-    conf_file, force_checkout, forks, upstream_repo_name, merge_branch_name, email_from, email_to, log_file_name, log_level, work_item_id, vm_name, snapshot_name = conf_details(config_file_path)
+    conf_file, force_checkout, forks, upstream_repo_name, merge_branch_name, email_from, email_to, log_file_name, email_log_level, work_item_id, vm_name, snapshot_name = conf_details(config_file_path)
     
     merge_report = {}
     merge_report = merge_submodules_with_upstream(merge_report, conf_file, force_checkout, forks, upstream_repo_name, merge_branch_name, skip_merge)
@@ -232,10 +232,10 @@ def main():
             merge_has_errors = True
             break
 
-    if merge_has_errors == False:
-        Build_and_Test_details = Build_and_Test(vm_name, snapshot_name)
-        push_and_PR_results = {}
+    Build_and_Test_details = Build_and_Test(vm_name, snapshot_name,merge_has_errors)
 
+    if merge_has_errors == False:
+        push_and_PR_results = {}
         if Build_and_Test_details[0] == 0:
             for git_obj, (status, message) in list(merge_report.items()):
                 if status == 0 and message is not None:
@@ -246,7 +246,7 @@ def main():
 
             merge_report["Push and PR"] = push_and_PR_results
 
-        merge_report["Build and Test"] = Build_and_Test_details
+    merge_report["Build and Test"] = Build_and_Test_details
 
 
     # Build the base-system-image
@@ -256,7 +256,7 @@ def main():
     # If not successful, do not push, and send an email about the test failure
     # If both are successful, push branch, create PR, send email with diff.
     
-    write_log_and_send_email(log_file_name, email_from, email_to, merge_report, log_level)
+    write_log_and_send_email(log_file_name, email_from, email_to, merge_report, email_log_level)
     
 if __name__ == "__main__":
     main()

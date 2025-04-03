@@ -22,7 +22,7 @@
     "email_from": "shreejit.c@emerson.com",
     "email_to": "shreejit.c@emerson.com",
     "log_file_name": "merge_log.txt",
-    "log_level": 1,
+    "email_log_level": 1,
     "work_item_id": 2951036,
     "VM_name": "NILRTAgain",
     "snapshot_name": "Clean_SSHEnabled"

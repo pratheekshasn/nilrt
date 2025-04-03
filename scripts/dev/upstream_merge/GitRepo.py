@@ -1,5 +1,4 @@
-from Shell_commands import *
-from Git_commands import *
+from git_commands import *
 
 class GitRepo:
     def __init__(self, local_repo, upstream_repo_url, upstream_branch, local_base_branch,upstream_repo_name,fork_name,fork_url):

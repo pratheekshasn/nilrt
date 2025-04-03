@@ -1,6 +1,6 @@
-from Shell_commands import *
+from shell_commands import *
 
-def build():
+def build_images():
     docker = start_docker_setup()
     if docker[0] != 0:
         return docker
@@ -15,7 +15,6 @@ def build():
     if core_images[0] != 0:
         return core_images
     print("\nCore images build completed.")
-    
 
     return (0, None)
 

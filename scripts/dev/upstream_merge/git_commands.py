@@ -1,4 +1,4 @@
-from Shell_commands import *
+from shell_commands import *
 
 def git_clone(repo, directory=None, depth=None, capture_output=True):
     command = f"git clone {repo} {directory}" if directory else f"git clone {repo}"
