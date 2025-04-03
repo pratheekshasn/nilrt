@@ -1,5 +1,6 @@
 automation_conf.json
-It is passed as argument while running upstream_merge.py
+//It is passed as argument while running upstream_merge.py
+
 
 upstream_merge.py
 main():

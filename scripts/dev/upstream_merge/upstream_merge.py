@@ -2,9 +2,9 @@ import os
 import argparse
 import json
 from GitRepo import *
-from git_commands import *
-from test import *
-from build import *
+from git_commands import send_email
+from build import build_images
+from test import OS_test
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Automated repository merging script")
@@ -215,6 +215,21 @@ def Build_and_Test(vm_name, snapshot_name, merge_has_errors):
     success = OS_test(vm_name, snapshot_name)
     return success
 
+def Push_and_PR_prepare(merge_has_errors, Build_and_Test_details, merge_report, merge_branch_name, work_item_id):
+    if merge_has_errors == False:
+        push_and_PR_results = {}
+        if Build_and_Test_details[0] == 0:
+            for git_obj, (status, message) in list(merge_report.items()):
+                if status == 0 and message is not None:
+                    current_directory = os.getcwd()
+                    os.chdir(git_obj.local_repo)
+                    push_and_PR_results[git_obj] = push_and_PR(git_obj, merge_branch_name, work_item_id)
+                    os.chdir(current_directory)
+
+            merge_report["Push and PR"] = push_and_PR_results
+
+    return merge_report
+
 def main():
     args = parse_args()
     skip_merge = args.skip_merge
@@ -233,19 +248,8 @@ def main():
             break
 
     Build_and_Test_details = Build_and_Test(vm_name, snapshot_name,merge_has_errors)
-
-    if merge_has_errors == False:
-        push_and_PR_results = {}
-        if Build_and_Test_details[0] == 0:
-            for git_obj, (status, message) in list(merge_report.items()):
-                if status == 0 and message is not None:
-                    current_directory = os.getcwd()
-                    os.chdir(git_obj.local_repo)
-                    push_and_PR_results[git_obj] = push_and_PR(git_obj, merge_branch_name, work_item_id)
-                    os.chdir(current_directory)
-
-            merge_report["Push and PR"] = push_and_PR_results
-
+    
+    merge_report = Push_and_PR_prepare(merge_has_errors, Build_and_Test_details , merge_report ,merge_branch_name ,work_item_id )
     merge_report["Build and Test"] = Build_and_Test_details
 
 
