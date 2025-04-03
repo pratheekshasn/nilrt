@@ -51,10 +51,14 @@ def git_branch(branch_name,show_current=False, create=False, delete=False, captu
         command = "git branch"
     return run_command(command, capture_output)
 
-def git_checkout(branch_name, capture_output=True):
-    if(not branch_exists(branch_name)):
+def git_checkout(branch_name, force_checkout = False, capture_output=True):
+    if not branch_exists(branch_name):
         git_branch(branch_name,create=True)
-    return run_command(f"git checkout {branch_name}", capture_output)
+    if force_checkout:
+        command = f"git checkout -f {branch_name}"
+    else:
+        command = f"git checkout {branch_name}"
+    return run_command(command, capture_output)
 
 def git_fetch(remote=None, branch=None):
     """Fetch latest changes from a specified remote repository and branch."""

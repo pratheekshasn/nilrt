@@ -29,7 +29,7 @@ def switch_to_base_branch_and_pull(git_obj,force_checkout):
         print(f"\n    Branch {git_obj.local_base_branch} does not exist. Exiting")
         return (1,f"\n    Branch {git_obj.local_base_branch} does not exist. Exiting")
     
-    if git_obj.checkout_branch(git_obj.local_base_branch)[0] != 0:
+    if git_obj.checkout_branch(git_obj.local_base_branch,force_checkout)[0] != 0:
         print(f"\n    Error switching to branch {git_obj.local_base_branch}. Exiting")
         return (1,f"\n    Error switching to branch {git_obj.local_base_branch}. Exiting")
     
@@ -138,42 +138,48 @@ def write_email_addresses(log_file_name, email_from, email_to):
 
 def format_status(status, message):
         if status == 1:
-            return " ... ERRORS", f" ... ERRORS\n    {message or ''}\n"
+            return " ... ERRORS", f" ... ERRORS\n    {message or ''}\n", f" ... ERRORS\n    {message or ''}\n\n\n"
         elif message is None:
-            return " ... OK (no changes)", " ... OK (no changes)\n"
+            return " ... OK (no changes)", "", " ... OK (no changes)\n\n\n"
         else:
-            return " ... OK", f" ... OK\n    {message}\n"
+            return " ... OK", "", f" ... OK\n    {message}\n\n\n"
         
 def format_merge_report(merge_report, email_log_level):
     min_detail = ""
+    error_detail = ""
     additional_detail = ""
     
-    min_detail += "\nBuild and Test\n"
     build_and_test_detail = merge_report.pop("Build and Test")
+
+    for git_obj, (status, message) in merge_report.items():
+        min_line, error_line, additional_line = format_status(status, message)
+        min_detail += f"{git_obj.local_repo}\n{min_line}\n"
+        if error_line != "":
+            error_detail += f"{git_obj.local_repo}\n{error_line}\n"
+        additional_detail += f"{git_obj.local_repo}\n\n{additional_line}"
+        if build_and_test_detail[0] == 0 and status == 0 and message is not None:
+            git_obj_push_details = push_and_PR_details[git_obj]
+            if git_obj_push_details[0] == 0:
+                min_detail += "     Push and PR ... OK\n"
+                additional_detail += f"     Push and PR ... OK\n    {message or ''}\n"
+            else:
+                min_detail += "     Push and PR ... ERRORS\n"
+                error_detail += f"{git_obj.local_repo}\n{min_line}\n     Push and PR ... ERRORS\n    {message}\n"
+                additional_detail += f"     Push and PR ... ERRORS\n    {message}\n"
+    
+    min_detail += "Build and Test\n"
     if build_and_test_detail[0] == 0:
         min_detail += " ... OK\n"
         additional_detail += f"\nBuild and Test\n ... OK\n    {build_and_test_detail[1]}\n"
         push_and_PR_details = merge_report.pop("Push and PR")
     else:
         min_detail += " ... ERRORS\n"
+        error_detail += f"\nBuild and Test\n ... ERRORS\n    {build_and_test_detail[1]}\n"
         additional_detail += f"\nBuild and Test\n ... ERRORS\n    {build_and_test_detail[1]}\n"
-
-    for git_obj, (status, message) in merge_report.items():
-        min_line, additional_line = format_status(status, message)
-        min_detail += f"{git_obj.local_repo}\n{min_line}\n"
-        additional_detail += f"{git_obj.local_repo}\n{additional_line}"
-        if build_and_test_detail[0] == 0 and status == 0 and message is not None:
-            git_obj_push_details = push_and_PR_details[git_obj]
-            if git_obj_push_details[0] == 0:
-                min_detail += "     Push and PR ... OK\n"
-                additional_detail += f" Push and PR ... OK\n    {message or ''}\n"
-            else:
-                min_detail += "     Push and PR ... ERRORS\n"
-                additional_detail += f" Push and PR ... ERRORS\n    {message}\n"
 
     if email_log_level == 0:
         return min_detail
-    return min_detail + "\n\n" + additional_detail
+    return min_detail + "\n\n" + error_detail + "\n\n" + additional_detail
 
 def merge_submodules_with_upstream(merge_report, conf_file, force_checkout, forks, upstream_repo_name, merge_branch_name, skip_merge):
     current_directory = os.getcwd()
@@ -249,7 +255,7 @@ def main():
 
     Build_and_Test_details = Build_and_Test(vm_name, snapshot_name,merge_has_errors)
     
-    merge_report = Push_and_PR_prepare(merge_has_errors, Build_and_Test_details , merge_report ,merge_branch_name ,work_item_id )
+    merge_report = Push_and_PR_prepare(merge_has_errors, Build_and_Test_details , merge_report ,merge_branch_name ,work_item_id)
     merge_report["Build and Test"] = Build_and_Test_details
 
 

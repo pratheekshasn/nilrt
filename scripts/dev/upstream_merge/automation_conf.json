@@ -1,6 +1,6 @@
 {
     "conf_file_path": "repos.conf",
-    "force_checkout": false,
+    "force_checkout": true,
     "forks":
     {
             "sources/bitbake": "https://github.com/Shreejit-03/bitbake.git",

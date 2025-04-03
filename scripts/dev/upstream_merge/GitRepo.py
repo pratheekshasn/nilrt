@@ -14,13 +14,13 @@ class GitRepo:
         """Get the current HEAD commit hash."""
         return get_current_commit()[1]
     
-    def branch_exists(self,branch_name):
+    def branch_exists(self, branch_name):
         """Check if a branch exists locally."""
         return branch_exists(branch_name)
     
-    def checkout_branch(self,branch_name):
+    def checkout_branch(self, branch_name, force_checkout = False):
         """Switch to the given branch."""
-        return git_checkout(branch_name)
+        return git_checkout(branch_name, force_checkout)
 
     def delete_branch(self,branch_name):
         """Delete a local branch."""

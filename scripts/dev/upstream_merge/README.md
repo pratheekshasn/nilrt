@@ -1,5 +1,35 @@
-automation_conf.json
-//It is passed as argument while running upstream_merge.py
+# HOW TO USE THE MERGE SCRIPT:
+
+## Enter the nilrt directory:
+cd ~/nilrt
+
+## To run the script:
+
+To perform merge
+python3 scripts/dev/upstream_merge/upstream_merge.py -c scripts/dev/upstream_merge/automation_conf.json
+or 
+python3 scripts/dev/upstream_merge/upstream_merge.py -c scripts/dev/upstream_merge/automation_conf.json -skip-merge False
+
+To Skip merge and continue with building and testing
+python3 scripts/dev/upstream_merge/upstream_merge.py -c scripts/dev/upstream_merge/automation_conf.json -skip-merge True
+
+### automation_conf.json
+
+conf_file_path - It has to be in /scripts/dev/upstream_merge/ folder and it is the name of configuration file(default - repos.conf).
+
+force_checkout - It enables forceful checkout to the base branch
+
+forks - It is a dictionary containing keys as local repository name(as mentioned in repos.conf) and url of your forks.
+
+upstream_repo_name -
+merge_branch_name - 
+email_from -
+email_to -
+log_file_name -
+email_log_level -
+work_item_id -
+vm_name - 
+snapshot_name -
 
 
 upstream_merge.py
