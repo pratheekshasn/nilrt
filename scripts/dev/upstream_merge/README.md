@@ -1,5 +1,3 @@
-
-```markdown
 # HOW TO USE THE MERGE SCRIPT
 
 This script automates the process of merging upstream changes, building images, and testing them on a virtual machine (VM). Follow the steps below to use the script effectively.
@@ -297,5 +295,3 @@ The script relies on a configuration file (`automation_conf.json`) to define var
   - Verifying the OS version.
 
 ---
-
-This corrected version ensures consistent formatting and proper Markdown syntax. Let me know if you need further assistance! 😊
