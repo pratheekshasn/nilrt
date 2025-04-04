@@ -4,7 +4,6 @@ import sys
 import logging
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(filename='mylog.log', level=logging.INFO)
 
 def run_command(command, capture_output=True):
     """
@@ -27,7 +26,7 @@ def run_command(command, capture_output=True):
             logger.info("Command output: %s", result.stdout.strip() + result.stderr.strip())
             return result.returncode, None
     except Exception as e:
-        logger.info("Exception running command: %s", str(e))
+        logger.critical("Exception running command: %s", str(e))
         return 1, f"Error running command '{command}': {str(e)}"
     
 def execute(command):
@@ -60,4 +59,5 @@ def execute(command):
         logger.info("Command output: %s", retval)
         return process.returncode, retval
     except Exception as e:
+        logger.critical("Exception running command: %s", str(e))
         return 1, f"Error running command '{command}': {str(e)}"

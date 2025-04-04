@@ -1,6 +1,7 @@
 import os
 import argparse
 import json
+import logging
 from GitRepo import *
 from git_commands import send_email
 from build import build_images
@@ -22,7 +23,21 @@ def conf_details(config_file_path):
         print(f"Error loading config file: {e}")
         exit(1)
     
-    return os.getcwd()+f"/scripts/dev/upstream_merge/{config.get('conf_file_path')}", config.get("force_checkout"), config.get("forks"), config.get("upstream_repo_name"), config.get("merge_branch_name"), config.get("email_from"), config.get("email_to"), config.get("log_file_name"), config.get("email_log_level"), config.get("work_item_id"), config.get("VM_name"), config.get("snapshot_name")
+    return os.getcwd()+f"/scripts/dev/upstream_merge/{config.get('conf_file_path')}", config.get("force_checkout"), config.get("forks"), config.get("upstream_repo_name"), config.get("merge_branch_name"), config.get("email_from"), config.get("email_to"), config.get("email_log_file_name"), config.get("email_log_level"), config.get("log_file_name"), config.get("log_level"), config.get("work_item_id"), config.get("VM_name"), config.get("snapshot_name")
+
+def setup_logging(log_file_name, log_level=10):
+    """
+    Set up logging configuration.
+    :param log_file_name: Name of the log file.
+    :param log_level: Logging level (default: 10).
+    """
+    logging.basicConfig(
+        level=log_level,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.FileHandler(log_file_name, mode='a')
+        ]
+    )
 
 def switch_to_base_branch_and_pull(git_obj,force_checkout):
     if not force_checkout and not git_obj.branch_exists(git_obj.local_base_branch):
@@ -130,8 +145,8 @@ def push_and_PR(git_obj,merge_branch_name,work_item_id):
 
     return (0,None)
     
-def write_email_addresses(log_file_name, email_from, email_to):
-    with open(log_file_name, "w") as log:
+def write_email_addresses(email_log_file_name, email_from, email_to):
+    with open(email_log_file_name, "w") as log:
         log.write(f"From: {email_from}\n")
         log.write(f"To: {email_to}\n")
         log.write("Subject: Merge Details\n\n")
@@ -184,7 +199,6 @@ def format_merge_report(merge_report, email_log_level):
 def merge_submodules_with_upstream(merge_report, conf_file, force_checkout, forks, upstream_repo_name, merge_branch_name, skip_merge):
     current_directory = os.getcwd()
 
-    # Merge each submodule with upstream
     with open(conf_file, "r") as file:
         for line in file:
             if line.startswith("#"):
@@ -202,17 +216,17 @@ def merge_submodules_with_upstream(merge_report, conf_file, force_checkout, fork
             os.chdir(current_directory)
     return merge_report
 
-def write_log(log_file_name, contents):
-    with open(log_file_name, "a") as log:
+def write_log(email_log_file_name, contents):
+    with open(email_log_file_name, "a") as log:
         log.write(contents)
 
-def write_log_and_send_email(log_file_name, email_from, email_to, merge_report, email_log_level):
+def write_log_and_send_email(email_log_file_name, email_from, email_to, merge_report, email_log_level):
     formatted_report_string = format_merge_report(merge_report,email_log_level)
-    write_email_addresses(log_file_name, email_from, email_to)
-    write_log(log_file_name, formatted_report_string)
-    send_email(to=email_to, subject="Merge Details", file=log_file_name)
+    write_email_addresses(email_log_file_name, email_from, email_to)
+    write_log(email_log_file_name, formatted_report_string)
+    send_email(to=email_to, subject="Merge Details", file=email_log_file_name)
 
-def Build_and_Test(vm_name, snapshot_name, merge_has_errors):
+def build_and_test(vm_name, snapshot_name, merge_has_errors):
     if merge_has_errors == True:
         return (1,"Merge has Errors")
     success = build_images()
@@ -221,7 +235,7 @@ def Build_and_Test(vm_name, snapshot_name, merge_has_errors):
     success = OS_test(vm_name, snapshot_name)
     return success
 
-def Push_and_PR_prepare(merge_has_errors, Build_and_Test_details, merge_report, merge_branch_name, work_item_id):
+def push_and_PR_prepare(merge_has_errors, Build_and_Test_details, merge_report, merge_branch_name, work_item_id):
     if merge_has_errors == False:
         push_and_PR_results = {}
         if Build_and_Test_details[0] == 0:
@@ -241,32 +255,20 @@ def main():
     skip_merge = args.skip_merge
     config_file_path = args.c
 
-    conf_file, force_checkout, forks, upstream_repo_name, merge_branch_name, email_from, email_to, log_file_name, email_log_level, work_item_id, vm_name, snapshot_name = conf_details(config_file_path)
+    conf_file, force_checkout, forks, upstream_repo_name, merge_branch_name, email_from, email_to, email_log_file_name, email_log_level, log_file_name, log_level, work_item_id, vm_name, snapshot_name = conf_details(config_file_path)
     
-    merge_report = {}
-    merge_report = merge_submodules_with_upstream(merge_report, conf_file, force_checkout, forks, upstream_repo_name, merge_branch_name, skip_merge)
-    
-    merge_has_errors = False
-    
-    for git_obj, (status, message) in merge_report.items():
-        if status == 1:
-            merge_has_errors = True
-            break
+    setup_logging(log_file_name, log_level)
 
-    Build_and_Test_details = Build_and_Test(vm_name, snapshot_name,merge_has_errors)
+    merge_report = merge_submodules_with_upstream({}, conf_file, force_checkout, forks, upstream_repo_name, merge_branch_name, skip_merge)
     
-    merge_report = Push_and_PR_prepare(merge_has_errors, Build_and_Test_details , merge_report ,merge_branch_name ,work_item_id)
+    merge_has_errors = any(status == 1 for status, _ in merge_report.values())
+
+    Build_and_Test_details = build_and_test(vm_name, snapshot_name,merge_has_errors)
+    
+    merge_report = push_and_PR_prepare(merge_has_errors, Build_and_Test_details , merge_report ,merge_branch_name ,work_item_id)
     merge_report["Build and Test"] = Build_and_Test_details
-
-
-    # Build the base-system-image
-    # If not successful, do not push, and send an email about the build failure
-    # Test the new image
-    # success = success and test()
-    # If not successful, do not push, and send an email about the test failure
-    # If both are successful, push branch, create PR, send email with diff.
     
-    write_log_and_send_email(log_file_name, email_from, email_to, merge_report, email_log_level)
+    write_log_and_send_email(email_log_file_name, email_from, email_to, merge_report, email_log_level)
     
 if __name__ == "__main__":
     main()

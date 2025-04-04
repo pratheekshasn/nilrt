@@ -21,8 +21,10 @@
     "merge_branch_name": "dev/automerge/ni",
     "email_from": "shreejit.c@emerson.com",
     "email_to": "shreejit.c@emerson.com",
-    "log_file_name": "merge_log.txt",
+    "email_log_file_name": "merge_log.txt",
     "email_log_level": 1,
+    "log_file_name": "merge_log.log",
+    "log_level": 10,
     "work_item_id": 2951036,
     "VM_name": "NILRTAgain",
     "snapshot_name": "Clean_SSHEnabled"
