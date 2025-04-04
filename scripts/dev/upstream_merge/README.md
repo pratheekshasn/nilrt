@@ -16,13 +16,17 @@ cd ~/nilrt
 #### **To Perform a Merge**
 This will merge upstream changes, build the images, and test them:
 ```bash
-python3 upstream_merge.py -c automation_conf.json
+python3 scripts/dev/upstream_merge/upstream_merge.py -c scripts/dev/upstream_merge/automation_conf.json
+```
+OR
+```bash
+python3 scripts/dev/upstream_merge/upstream_merge.py -c scripts/dev/upstream_merge/automation_conf.json -skip-merge False
 ```
 
 #### **To Skip the Merge and Only Build and Test**
 If you want to skip the merge step and directly proceed with building and testing:
 ```bash
-python3 upstream_merge.py -c automation_conf.json -skip-merge True
+python3 scripts/dev/upstream_merge/upstream_merge.py -c scripts/dev/upstream_merge/automation_conf.json -skip-merge True
 ```
 
 ---
@@ -118,14 +122,14 @@ The script relies on a configuration file (`automation_conf.json`) to define var
 
 ### **`GitRepo.py`**
 - Defines the `GitRepo` class, which encapsulates details and operations for a Git repository.  
-- Key attributes include:
-  - `local_repo`
-  - `local_base_branch`
-  - `upstream_branch`
-  - `upstream_repo_name`
-  - `upstream_repo_url`
-  - `fork_name`
-  - `fork_url`
+-  Data members are:
+    - local_repo
+    - local_base_branch
+    - upstream_branch
+    - upstream_repo_name
+    - upstream_repo_url
+    - fork_name
+    - fork_url
 
 ### **`build.py`**
 - Handles the process of building images.  
