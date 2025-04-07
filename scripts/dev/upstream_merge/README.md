@@ -18,10 +18,6 @@ This will merge upstream changes, build the images, and test them:
 ```bash
 python3 scripts/dev/upstream_merge/upstream_merge.py -c scripts/dev/upstream_merge/automation_conf.json
 ```
-OR
-```bash
-python3 scripts/dev/upstream_merge/upstream_merge.py -c scripts/dev/upstream_merge/automation_conf.json -skip-merge False
-```
 
 #### **To Skip the Merge and Only Build and Test**
 If you want to skip the merge step and directly proceed with building and testing:

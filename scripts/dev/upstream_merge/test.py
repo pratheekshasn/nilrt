@@ -145,3 +145,10 @@ def poweroff_VM(VM_name):
     print("Powering off the VM...")
     return execute(f"VBoxManage controlvm \"{VM_name}\" poweroff")
 
+if __name__ == "__main__":
+    # Example usage
+    VM_name = "NILRTAgain"
+    snapshot_name = "Clean_SSHEnabled"
+    
+    result = OS_test(VM_name, snapshot_name)
+    print(result)

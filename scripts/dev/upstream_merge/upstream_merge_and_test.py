@@ -1,3 +1,4 @@
+import datetime
 import os
 import argparse
 import json
@@ -9,13 +10,13 @@ from test import OS_test
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Automated repository merging script")
-    parser.add_argument("-c", type=str, help="Path to configuration file", default="automation_conf.json")
+    parser.add_argument("-c", type=str, help="Path to configuration file", default="scripts/dev/upstream_merge/automation_conf.json")
     parser.add_argument("-skip-merge", type=bool, help="Skip merging with upstream", default=False)
     args = parser.parse_args()
 
     return args
 
-def conf_details(config_file_path):
+def parse_config_file(config_file_path):
     try:
         with open(config_file_path, "r") as file:
             config = json.load(file)
@@ -23,19 +24,20 @@ def conf_details(config_file_path):
         print(f"Error loading config file: {e}")
         exit(1)
     
-    return os.getcwd()+f"/scripts/dev/upstream_merge/{config.get('conf_file_path')}", config.get("force_checkout"), config.get("forks"), config.get("upstream_repo_name"), config.get("merge_branch_name"), config.get("email_from"), config.get("email_to"), config.get("email_log_file_name"), config.get("email_log_level"), config.get("log_file_name"), config.get("log_level"), config.get("work_item_id"), config.get("VM_name"), config.get("snapshot_name")
+    return os.getcwd()+f"/scripts/dev/upstream_merge/{config.get('conf_file_path')}", config.get("force_checkout"), config.get("forks"), config.get("upstream_repo_name"), config.get("merge_branch_name"), config.get("email_from"), config.get("email_to"), config.get("email_log_level"), config.get("log_level"), config.get("work_item_id"), config.get("VM_name"), config.get("snapshot_name")
 
-def setup_logging(log_file_name, log_level=10):
+def setup_logging(log_level=10):
     """
     Set up logging configuration.
     :param log_file_name: Name of the log file.
     :param log_level: Logging level (default: 10).
     """
+    os.makedirs(f"temp", exist_ok=True)
     logging.basicConfig(
         level=log_level,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         handlers=[
-            logging.FileHandler(log_file_name, mode='a')
+            logging.FileHandler(f"temp/upstream_merge_{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.log", mode='a')
         ]
     )
 
@@ -76,7 +78,7 @@ def create_merge_branch(git_obj,merge_branch_name):
     
     return (0,None)
 
-def merge_prepare(git_obj, merge_branch_name, force_checkout):
+def prepare_for_merge(git_obj, merge_branch_name, force_checkout):
     print(f"{git_obj.local_repo}")
 
     base_branch_details = switch_to_base_branch_and_pull(git_obj,force_checkout)
@@ -99,7 +101,7 @@ def merge_upstream(git_obj,force_checkout, merge_branch_name, skip_merge):
     if skip_merge:
         return (0," Has Been Skipped")
     
-    merge_prepare_details = merge_prepare(git_obj,merge_branch_name,force_checkout)
+    merge_prepare_details = prepare_for_merge(git_obj,merge_branch_name,force_checkout)
     
     if merge_prepare_details[0]==1:
         return merge_prepare_details
@@ -118,7 +120,7 @@ def merge_upstream(git_obj,force_checkout, merge_branch_name, skip_merge):
     else:
         return (1,merge_result[1])
 
-def push_and_PR(git_obj,merge_branch_name,work_item_id):
+def push_branch_and_create_PR(git_obj,merge_branch_name,work_item_id):
     if git_obj.add_remote(git_obj.fork_name, git_obj.fork_url)[0] != 0:
         print(f"\n    Error adding remote repository {git_obj.fork_name} using {git_obj.fork_url}. Exiting")
         return (1,f"\n    Error adding remote repository {git_obj.fork_name} using {git_obj.fork_url}. Exiting")
@@ -131,15 +133,7 @@ def push_and_PR(git_obj,merge_branch_name,work_item_id):
         print(f"\n    Failed to push branch {merge_branch_name} to {git_obj.fork_name}")
         return (1, f"\n    Failed to push branch {merge_branch_name} to {git_obj.fork_name}")
     
-    #if git_obj.create_pull_request("Automated Merge PR",
-#       f"""Merge latest from upstream. No conflicts.
- 
-    # #AB{work_item_id}
-    
-    # - [ ] bitbake packagefeed-ni-core
-    # - [ ] bitbake packagegroup-ni-desirable
-    # - [ ] bitbake package-index && bitbake nilrt-base-system-image
-    # - [ ] Reimaged a cRIO with the new base image and successfully booted it""",git_obj.local_base_branch,f"Shreejit-03:{merge_branch_name}")[0] != 0:
+    # if git_obj.create_pull_request("Automated Merge PR",get_PR_description_template(work_item_id),git_obj.local_base_branch,f"Shreejit-03:{merge_branch_name}")[0] != 0:
     #     print("\n    Error creating the pull request.")
     #     return (1,"\n    Error creating the pull request.")
 
@@ -163,8 +157,10 @@ def format_merge_report(merge_report, email_log_level):
     min_detail = ""
     error_detail = ""
     additional_detail = ""
-    
+
     build_and_test_detail = merge_report.pop("Build and Test")
+    if build_and_test_detail[0] == 0:
+        push_and_PR_details = merge_report.pop("Push and PR")    
 
     for git_obj, (status, message) in merge_report.items():
         min_line, error_line, additional_line = format_status(status, message)
@@ -186,17 +182,17 @@ def format_merge_report(merge_report, email_log_level):
     if build_and_test_detail[0] == 0:
         min_detail += " ... OK\n"
         additional_detail += f"\nBuild and Test\n ... OK\n    {build_and_test_detail[1]}\n"
-        push_and_PR_details = merge_report.pop("Push and PR")
     else:
         min_detail += " ... ERRORS\n"
         error_detail += f"\nBuild and Test\n ... ERRORS\n    {build_and_test_detail[1]}\n"
         additional_detail += f"\nBuild and Test\n ... ERRORS\n    {build_and_test_detail[1]}\n"
-
+    
     if email_log_level == 0:
         return min_detail
     return min_detail + "\n\n" + error_detail + "\n\n" + additional_detail
 
-def merge_submodules_with_upstream(merge_report, conf_file, force_checkout, forks, upstream_repo_name, merge_branch_name, skip_merge):
+def merge_submodules_with_upstream(conf_file, force_checkout, forks, upstream_repo_name, merge_branch_name, skip_merge):
+    merge_report = {}
     current_directory = os.getcwd()
 
     with open(conf_file, "r") as file:
@@ -220,7 +216,8 @@ def write_log(email_log_file_name, contents):
     with open(email_log_file_name, "a") as log:
         log.write(contents)
 
-def write_log_and_send_email(email_log_file_name, email_from, email_to, merge_report, email_log_level):
+def write_log_and_send_email(email_from, email_to, merge_report, email_log_level):
+    email_log_file_name = f"temp/upstream_merge_{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.log"
     formatted_report_string = format_merge_report(merge_report,email_log_level)
     write_email_addresses(email_log_file_name, email_from, email_to)
     write_log(email_log_file_name, formatted_report_string)
@@ -243,32 +240,42 @@ def push_and_PR_prepare(merge_has_errors, Build_and_Test_details, merge_report, 
                 if status == 0 and message is not None:
                     current_directory = os.getcwd()
                     os.chdir(git_obj.local_repo)
-                    push_and_PR_results[git_obj] = push_and_PR(git_obj, merge_branch_name, work_item_id)
+                    push_and_PR_results[git_obj] = push_branch_and_create_PR(git_obj, merge_branch_name, work_item_id)
                     os.chdir(current_directory)
 
             merge_report["Push and PR"] = push_and_PR_results
 
     return merge_report
 
+# def get_PR_description_template(work_item_id):
+#     return f"""Merge latest from upstream. No conflicts.
+ 
+#     #AB{work_item_id}
+    
+#     - [ ] bitbake packagefeed-ni-core
+#     - [ ] bitbake packagegroup-ni-desirable
+#     - [ ] bitbake package-index && bitbake nilrt-base-system-image
+#     - [ ] Reimaged a cRIO with the new base image and successfully booted it"""
+
 def main():
     args = parse_args()
     skip_merge = args.skip_merge
     config_file_path = args.c
 
-    conf_file, force_checkout, forks, upstream_repo_name, merge_branch_name, email_from, email_to, email_log_file_name, email_log_level, log_file_name, log_level, work_item_id, vm_name, snapshot_name = conf_details(config_file_path)
+    conf_file, force_checkout, forks, upstream_repo_name, merge_branch_name, email_from, email_to, email_log_level, log_level, work_item_id, vm_name, snapshot_name = parse_config_file(config_file_path)
     
-    setup_logging(log_file_name, log_level)
+    setup_logging(log_level)
 
-    merge_report = merge_submodules_with_upstream({}, conf_file, force_checkout, forks, upstream_repo_name, merge_branch_name, skip_merge)
+    merge_report = merge_submodules_with_upstream(conf_file, force_checkout, forks, upstream_repo_name, merge_branch_name, skip_merge)
     
     merge_has_errors = any(status == 1 for status, _ in merge_report.values())
 
     Build_and_Test_details = build_and_test(vm_name, snapshot_name,merge_has_errors)
-    
+
     merge_report = push_and_PR_prepare(merge_has_errors, Build_and_Test_details , merge_report ,merge_branch_name ,work_item_id)
     merge_report["Build and Test"] = Build_and_Test_details
     
-    write_log_and_send_email(email_log_file_name, email_from, email_to, merge_report, email_log_level)
+    write_log_and_send_email(email_from, email_to, merge_report, email_log_level)
     
 if __name__ == "__main__":
     main()
