@@ -112,8 +112,9 @@ def merge_upstream(git_obj,force_checkout, merge_branch_name, skip_merge):
 
     if merge_result[0] == 0:        
         diff_output=git_obj.diff()
-        
-        if (git_obj.get_current_commit() == commit_before_merge) or diff_output == (0,None):
+        print(diff_output)
+    
+        if (git_obj.get_current_commit() == commit_before_merge) or diff_output == (0,''):
             return (0,None)
         else:
             return (0,diff_output[1])
@@ -172,11 +173,11 @@ def format_merge_report(merge_report, email_log_level):
             git_obj_push_details = push_and_PR_details[git_obj]
             if git_obj_push_details[0] == 0:
                 min_detail += "     Push and PR ... OK\n"
-                additional_detail += f"     Push and PR ... OK\n    {message or ''}\n"
+                additional_detail += f"     Push and PR ... OK\n    {git_obj_push_details[1]}\n"
             else:
                 min_detail += "     Push and PR ... ERRORS\n"
-                error_detail += f"{git_obj.local_repo}\n{min_line}\n     Push and PR ... ERRORS\n    {message}\n"
-                additional_detail += f"     Push and PR ... ERRORS\n    {message}\n"
+                error_detail += f"{git_obj.local_repo}\n{min_line}\n     Push and PR ... ERRORS\n    {git_obj_push_details[1]}\n"
+                additional_detail += f"     Push and PR ... ERRORS\n    {git_obj_push_details[1]}\n"
     
     min_detail += "Build and Test\n"
     if build_and_test_detail[0] == 0:
@@ -217,7 +218,7 @@ def write_log(email_log_file_name, contents):
         log.write(contents)
 
 def write_log_and_send_email(email_from, email_to, merge_report, email_log_level):
-    email_log_file_name = f"temp/upstream_merge_{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.log"
+    email_log_file_name = f"temp/upstream_merge_{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.txt"
     formatted_report_string = format_merge_report(merge_report,email_log_level)
     write_email_addresses(email_log_file_name, email_from, email_to)
     write_log(email_log_file_name, formatted_report_string)
