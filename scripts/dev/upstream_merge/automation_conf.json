@@ -1,5 +1,5 @@
 {
-    "conf_file_path": "repos.conf",
+    "conf_file_path": "scripts/dev/upstream_merge/repos.conf",
     "force_checkout": true,
     "forks":
     {

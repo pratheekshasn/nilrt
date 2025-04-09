@@ -52,15 +52,9 @@ The script relies on a configuration file (`automation_conf.json`) to define var
 - **`email_to`**:  
   The email address to which the merge report will be sent.
 
-- **`email_log_file_name`**:  
-  The file containing the content to be emailed.
-
 - **`email_log_level`**:  
   - `0`: Minimal information will be included in the email.  
   - `1`: Additional detailed information will be included in the email.
-
-- **`log_file_name`**:  
-  The file where log data will be stored.
 
 - **`log_level`**:  
   Integer representing the logging level:  

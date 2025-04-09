@@ -24,7 +24,7 @@ def parse_config_file(config_file_path):
         print(f"Error loading config file: {e}")
         exit(1)
     
-    return os.getcwd()+f"/scripts/dev/upstream_merge/{config.get('conf_file_path')}", config.get("force_checkout"), config.get("forks"), config.get("upstream_repo_name"), config.get("merge_branch_name"), config.get("email_from"), config.get("email_to"), config.get("email_log_level"), config.get("log_level"), config.get("work_item_id"), config.get("VM_name"), config.get("snapshot_name")
+    return os.getcwd()+f"/{config.get('conf_file_path')}", config.get("force_checkout"), config.get("forks"), config.get("upstream_repo_name"), config.get("merge_branch_name"), config.get("email_from"), config.get("email_to"), config.get("email_log_level"), config.get("log_level"), config.get("work_item_id"), config.get("VM_name"), config.get("snapshot_name")
 
 def setup_logging(log_level=10):
     """
@@ -111,9 +111,7 @@ def merge_upstream(git_obj,force_checkout, merge_branch_name, skip_merge):
     merge_result = git_obj.merge_branch(f"{git_obj.upstream_repo_name}/{git_obj.upstream_branch}", "Merge latest upstream")
 
     if merge_result[0] == 0:        
-        diff_output=git_obj.diff()
-        print(diff_output)
-    
+        diff_output=git_obj.diff()    
         if (git_obj.get_current_commit() == commit_before_merge) or diff_output == (0,''):
             return (0,None)
         else:
