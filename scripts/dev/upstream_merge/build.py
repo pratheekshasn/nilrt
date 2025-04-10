@@ -55,3 +55,11 @@ def build_core_images():
     """
     print("\nBuilding core images...\n")
     return execute("bash scripts/pipelines/build.core-images.sh")
+
+if __name__ == "__main__":
+    status_code, message = build_images()
+    
+    if status_code == 0:
+        print("\nBuild completed successfully.")
+    else:
+        print(f"\nBuild failed with status code {status_code}. Error: {message}")

@@ -1,7 +1,7 @@
 from git_commands import *
 
 class GitRepo:
-    def __init__(self, local_repo, upstream_repo_url, upstream_branch, local_base_branch,upstream_repo_name,fork_name,fork_url):
+    def __init__(self, local_repo=None, upstream_repo_url=None, upstream_branch=None, local_base_branch=None,upstream_repo_name=None,fork_name=None,fork_url=None):
         self.local_repo = local_repo
         self.local_base_branch = local_base_branch
         self.upstream_branch = upstream_branch

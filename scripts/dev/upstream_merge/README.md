@@ -77,26 +77,32 @@ The script relies on a configuration file (`automation_conf.json`) to define var
 
 ## **Script Overview**
 
-### **`main()`**
-- **`parse_args()`**: Parses command-line arguments, such as the path to the configuration file and whether to skip the merge step.
-- **`conf_details()`**: Extracts information from the `automation_conf.json` file.
-- **`merge_submodules_with_upstream()`**: Handles merging upstream changes for each submodule:
-  - **`merge_upstream()`**:
-    - **`merge_prepare()`**:
-      - **`switch_to_base_branch_and_pull()`**: Switches to the base branch and pulls the latest changes.
-      - **`fetch_upstream()`**: Fetches updates from the upstream repository.
-      - **`create_merge_branch()`**: Creates a new branch for the merge.
-    - Performs the merge, compares it with the previous commit, and generates a diff if there are changes.
-- **`build_and_test()`**:
-  - **`build_images()`**: Builds the required images (defined in `build.py`).
-  - **`OS_test()`**: Tests the built images on a VM (defined in `test.py`).
-- **`push_and_PR_prepare()`**:
-  - Prepares and pushes the branch to the fork and creates a pull request if there are any mergeable changes.
-- **`write_log_and_send_email()`**:
-  - **`format_merge_report()`**: Formats the merge report.
-  - **`write_email_addresses()`**: Writes the email addresses for the report.
-  - **`write_log()`**: Writes the log data to a file.
-  - **`send_email()`**: Sends the email using `git send-email`.
+### **Workflow for Each Submodule in the `nilrt` Repository**
+
+1. **Check Out the Base Branch**:  
+   - The script checks out the base branch as specified in the `repos.conf` file.
+
+2. **Pull the Upstream Branch**:  
+   - The upstream branch mentioned in `repos.conf` is pulled to ensure the latest changes are fetched.
+
+3. **Merge the Two Branches**:  
+   - The base branch and the upstream branch are merged.
+   - The script reports whether the merge was successful or if it encountered any conflicts.
+
+4. **Build Images on Successful Merge**:  
+   - If the merge is successful, the script proceeds to build the following images:
+     - **Safemode Image**
+     - **Runmode Image**
+
+5. **Install Images on the RT Target (VM)**:  
+   - The safemode and runmode images are installed on a Real-Time (RT) target, which is a Virtual Machine (VM) in this case.
+
+6. **Test the Installation**:  
+   - The script verifies that the installation is not faulty by running tests on the VM.
+
+---
+
+This structure makes the workflow easier to follow and understand. Let me know if you need further adjustments!
 
 ---
 

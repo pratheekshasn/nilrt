@@ -82,17 +82,17 @@ def prepare_for_merge(git_obj, merge_branch_name, force_checkout):
     print(f"{git_obj.local_repo}")
 
     base_branch_details = switch_to_base_branch_and_pull(git_obj,force_checkout)
-    if base_branch_details[0]==1:
+    if base_branch_details[0] != 0:
         return base_branch_details
     
     fetch_details = fetch_upstream(git_obj)
     
-    if fetch_details[0]==1:
+    if fetch_details[0] != 0:
         return fetch_details
     
     repo_details = create_merge_branch(git_obj, merge_branch_name)
 
-    if repo_details[0]==1:
+    if repo_details[0] != 0:
         return repo_details
     
     return (0,None)
@@ -103,7 +103,7 @@ def merge_upstream(git_obj,force_checkout, merge_branch_name, skip_merge):
     
     merge_prepare_details = prepare_for_merge(git_obj,merge_branch_name,force_checkout)
     
-    if merge_prepare_details[0]==1:
+    if merge_prepare_details[0] != 0:
         return merge_prepare_details
     
     commit_before_merge = git_obj.get_current_commit()
@@ -121,11 +121,11 @@ def merge_upstream(git_obj,force_checkout, merge_branch_name, skip_merge):
 
 def push_branch_and_create_PR(git_obj,merge_branch_name,work_item_id):
     push_details = push_branch(git_obj,merge_branch_name)
-    if push_details[0] == 1:
+    if push_details[0] != 0:
         return push_details
     
     # PR_details = create_PR(git_obj,merge_branch_name,work_item_id)
-    # if PR_details[0] == 1:
+    # if PR_details[0] !=0:
     #     return PR_details
 
     return (0,None)
@@ -159,7 +159,7 @@ def write_email_addresses(email_log_file_name, email_from, email_to):
         log.write("Subject: Merge Details\n\n")
 
 def format_status(status, message):
-        if status == 1:
+        if status != 0:
             return " ... ERRORS", f" ... ERRORS\n    {message or ''}\n", f" ... ERRORS\n    {message or ''}\n\n\n"
         elif message is None:
             return " ... OK (no changes)", "", " ... OK (no changes)\n\n\n"
@@ -275,10 +275,15 @@ def main():
     skip_merge = args.skip_merge
     config_file_path = args.c
 
-    conf_file, force_checkout, forks, upstream_repo_name, merge_branch_name, email_from, email_to, email_log_level, log_level, work_item_id, vm_name, snapshot_name = parse_config_file(config_file_path)
+    conf_file, force_checkout, forks, upstream_repo_name, merge_branch_name, email_from, email_to, email_log_level, log_level, work_item_id, vm_name, snapshot_name = parse_config_file(config_file_path)    
     
     setup_logging(log_level)
 
+    pull_from_nilrt_details = pull_from_nilrt()
+    if pull_from_nilrt_details[0] != 0:
+        print(pull_from_nilrt_details[1])
+        return
+    
     merge_report = merge_submodules_with_upstream(conf_file, force_checkout, forks, upstream_repo_name, merge_branch_name, skip_merge)
     
     merge_has_errors = any(status == 1 for status, _ in merge_report.values())
@@ -289,6 +294,21 @@ def main():
     merge_report["Build and Test"] = Build_and_Test_details
     
     write_log_and_send_email(email_from, email_to, merge_report, email_log_level)
+
+def pull_from_nilrt():
+    """
+    Pull the latest changes from the NILRT repository.
+    """
+    nilrt_obj = GitRepo()
+    if nilrt_obj.add_remote("upstream","https://github.com/ni/nilrt.git")[0] != 0:
+        return (1,f"\n    Error adding remote repository 'upstream' with the url 'https://github.com/ni/nilrt.git'. Exiting")
+    
+    if nilrt_obj.pull_latest("nilrt/master/scarthgap","upstream")[0] != 0:
+        return (1,f"\n    Error pulling latest on nilrt/master/scarthgap. Exiting")
+    
+    return (0,None)
+
+    
     
 if __name__ == "__main__":
     main()
