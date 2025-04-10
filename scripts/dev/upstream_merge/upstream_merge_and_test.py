@@ -120,6 +120,17 @@ def merge_upstream(git_obj,force_checkout, merge_branch_name, skip_merge):
         return (1,merge_result[1])
 
 def push_branch_and_create_PR(git_obj,merge_branch_name,work_item_id):
+    push_details = push_branch(git_obj,merge_branch_name)
+    if push_details[0] == 1:
+        return push_details
+    
+    # PR_details = create_PR(git_obj,merge_branch_name,work_item_id)
+    # if PR_details[0] == 1:
+    #     return PR_details
+
+    return (0,None)
+
+def push_branch(git_obj,merge_branch_name):
     if git_obj.add_remote(git_obj.fork_name, git_obj.fork_url)[0] != 0:
         print(f"\n    Error adding remote repository {git_obj.fork_name} using {git_obj.fork_url}. Exiting")
         return (1,f"\n    Error adding remote repository {git_obj.fork_name} using {git_obj.fork_url}. Exiting")
@@ -132,9 +143,12 @@ def push_branch_and_create_PR(git_obj,merge_branch_name,work_item_id):
         print(f"\n    Failed to push branch {merge_branch_name} to {git_obj.fork_name}")
         return (1, f"\n    Failed to push branch {merge_branch_name} to {git_obj.fork_name}")
     
-    # if git_obj.create_pull_request("Automated Merge PR",get_PR_description_template(work_item_id),git_obj.local_base_branch,f"Shreejit-03:{merge_branch_name}")[0] != 0:
-    #     print("\n    Error creating the pull request.")
-    #     return (1,"\n    Error creating the pull request.")
+    return (0,None)
+
+def create_PR(git_obj,merge_branch_name,work_item_id):
+    if git_obj.create_pull_request("Automated Merge PR",get_PR_description_template(work_item_id),git_obj.local_base_branch,f"Shreejit-03:{merge_branch_name}")[0] != 0:
+        print("\n    Error creating the pull request.")
+        return (1,"\n    Error creating the pull request.")
 
     return (0,None)
     
@@ -246,15 +260,15 @@ def push_and_PR_prepare(merge_has_errors, Build_and_Test_details, merge_report, 
 
     return merge_report
 
-# def get_PR_description_template(work_item_id):
-#     return f"""Merge latest from upstream. No conflicts.
+def get_PR_description_template(work_item_id):
+    return f"""Merge latest from upstream. No conflicts.
  
-#     #AB{work_item_id}
+    #AB{work_item_id}
     
-#     - [ ] bitbake packagefeed-ni-core
-#     - [ ] bitbake packagegroup-ni-desirable
-#     - [ ] bitbake package-index && bitbake nilrt-base-system-image
-#     - [ ] Reimaged a cRIO with the new base image and successfully booted it"""
+    - [ ] bitbake packagefeed-ni-core
+    - [ ] bitbake packagegroup-ni-desirable
+    - [ ] bitbake package-index && bitbake nilrt-base-system-image
+    - [ ] Reimaged a cRIO with the new base image and successfully booted it"""
 
 def main():
     args = parse_args()
