@@ -27,16 +27,6 @@ class GitRepo:
         """
         return run_command(f"git rev-parse --verify {branch_name}", capture_output)[0] == 0
     
-    
-    def branch_exists(self,branch_name, capture_output=True):
-        """
-        Check if a branch exists locally.
-        :param branch_name: Name of the branch to check.
-        :param capture_output: Whether to capture the command output.
-        :return: True if the branch exists, False otherwise.
-        """
-        return run_command(f"git rev-parse --verify {branch_name}", capture_output)[0] == 0
-    
     def checkout_branch(self, branch_name, create = False, force_checkout = False):
         """Switch to the given branch."""
         return git_checkout(branch_name, create, force_checkout)

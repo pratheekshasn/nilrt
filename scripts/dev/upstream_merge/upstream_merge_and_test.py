@@ -175,20 +175,20 @@ def format_merge_report(merge_report, email_log_level):
 
     Merge completed successfully:
     sources/bitbake
-    ... OK
+     ... OK
          Push and PR ... OK
 
     No changes were detected during the merge:
     sources/bitbake
-    ... OK (no changes)
+     ... OK (no changes)
 
     Errors occurred during the merge:
     sources/bitbake
-    ... ERRORS
+     ... ERRORS
     """
     min_detail = ""
     error_detail = ""
-    additional_detail = ""
+    diff_detail = ""
 
     build_and_test_detail = merge_report.pop("Build and Test")
     if build_and_test_detail[0] == 0:
@@ -199,29 +199,29 @@ def format_merge_report(merge_report, email_log_level):
         min_detail += f"{git_obj.local_repo}\n{min_line}\n"
         if error_line != "":
             error_detail += f"{git_obj.local_repo}\n{error_line}\n"
-        additional_detail += f"{git_obj.local_repo}\n\n{additional_line}"
+        diff_detail += f"{git_obj.local_repo}\n\n{additional_line}"
         if build_and_test_detail[0] == 0 and status == 0 and message is not None:
             git_obj_push_details = push_and_PR_details[git_obj]
             if git_obj_push_details[0] == 0:
                 min_detail += "     Push and PR ... OK\n"
-                additional_detail += f"     Push and PR ... OK\n    {git_obj_push_details[1]}\n"
+                diff_detail += f"     Push and PR ... OK\n    {git_obj_push_details[1]}\n"
             else:
                 min_detail += "     Push and PR ... ERRORS\n"
                 error_detail += f"{git_obj.local_repo}\n{min_line}\n     Push and PR ... ERRORS\n    {git_obj_push_details[1]}\n"
-                additional_detail += f"     Push and PR ... ERRORS\n    {git_obj_push_details[1]}\n"
+                diff_detail += f"     Push and PR ... ERRORS\n    {git_obj_push_details[1]}\n"
     
     min_detail += "Build and Test\n"
     if build_and_test_detail[0] == 0:
         min_detail += " ... OK\n"
-        additional_detail += f"\nBuild and Test\n ... OK\n    {build_and_test_detail[1]}\n"
+        diff_detail += f"\nBuild and Test\n ... OK\n    {build_and_test_detail[1]}\n"
     else:
         min_detail += " ... ERRORS\n"
         error_detail += f"\nBuild and Test\n ... ERRORS\n    {build_and_test_detail[1]}\n"
-        additional_detail += f"\nBuild and Test\n ... ERRORS\n    {build_and_test_detail[1]}\n"
+        diff_detail += f"\nBuild and Test\n ... ERRORS\n    {build_and_test_detail[1]}\n"
     
     if email_log_level == 0:
         return min_detail + "\n\n" + error_detail
-    return min_detail + "\n\n" + error_detail + "\n\n" + additional_detail
+    return min_detail + "\n\n" + error_detail + "\n\n" + diff_detail
 
 def merge_submodules_with_upstream(conf_file, force_checkout, forks, upstream_repo_name, merge_branch_name, skip_merge):
     merge_report = {}
@@ -325,9 +325,7 @@ def pull_from_nilrt():
     if nilrt_obj.pull_latest("nilrt/master/scarthgap","upstream")[0] != 0:
         return (1,f"\n    Error pulling latest on nilrt/master/scarthgap. Exiting")
     
-    return (0,None)
-
-    
+    return (0,None)    
     
 if __name__ == "__main__":
     main()

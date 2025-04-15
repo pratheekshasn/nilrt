@@ -13,6 +13,13 @@ cd ~/nilrt
 
 ### **2. Run the Script**
 
+Note:
+If the configuration file is automation_conf.json, you do not need to specify its path explicitly, as it is the default. However, if you are using a different configuration file, you must provide its path using the -c argument.For example:
+
+```bash
+python3 scripts/dev/upstream_merge/upstream_merge.py -c path/to/your_config.json -skip-merge True
+```
+
 #### **To Perform a Merge**
 This will merge upstream changes, build the images, and test them:
 ```bash
@@ -22,14 +29,14 @@ python3 scripts/dev/upstream_merge/upstream_merge.py
 #### **To Skip the Merge and Only Build and Test**
 If you want to skip the merge step and directly proceed with building and testing:
 ```bash
-python3 scripts/dev/upstream_merge/upstream_merge.py -c scripts/dev/upstream_merge/automation_conf.json -skip-merge True
+python3 scripts/dev/upstream_merge/upstream_merge.py -skip-merge True
 ```
 
 ---
 
 ## **Configuration File: `automation_conf.json`**
 
-The script relies on a configuration file (`automation_conf.json`) to define various parameters. Below is an explanation of the fields in the configuration file:
+The script relies on a configuration file (`automation_conf.json`) to define various parameters. **All fields are required**, and if a field is not present, None will be used as the default value. Below is an explanation of the fields in the configuration file:
  
 - **`conf_file_path`**:  
   Path to the configuration file (default: [`repos.conf`](./repos.conf)).
@@ -38,7 +45,7 @@ The script relies on a configuration file (`automation_conf.json`) to define var
   Enables forceful checkout to the base branch if set to `True`.
 
 - **`forks`**:  
-  A dictionary where the keys are local repository names (as mentioned in `repos.conf`(./repos.conf)) and the values are the URLs of your forks.
+  A dictionary where the keys are local repository names (as mentioned in [`repos.conf`](./repos.conf)) and the values are the URLs of your forks.
 
 - **`upstream_repo_name`**:  
   The name of the upstream remote repository.
@@ -62,9 +69,6 @@ The script relies on a configuration file (`automation_conf.json`) to define var
 
   - **`1`**:  
     - Includes the diff (differences) for a successful merge in addition to the status.
-
----
-
 
 - **`log_level`**:  
   Integer representing the logging level:  
@@ -90,10 +94,10 @@ The script relies on a configuration file (`automation_conf.json`) to define var
 ### **Workflow for Each Submodule in the `nilrt` Repository**
 
 1. **Check Out the Base Branch**:  
-   - The script checks out the base branch as specified in the `repos.conf`(./repos.conf) file.
+   - The script checks out the base branch as specified in the [`repos.conf`](./repos.conf) file.
 
 2. **Pull the Upstream Branch**:  
-   - The upstream branch mentioned in `repos.conf`(./repos.conf) is pulled to ensure the latest changes are fetched.
+   - The upstream branch mentioned in [`repos.conf`](./repos.conf) is pulled to ensure the latest changes are fetched.
 
 3. **Merge the Two Branches**:  
    - The base branch and the upstream branch are merged.
@@ -109,6 +113,10 @@ The script relies on a configuration file (`automation_conf.json`) to define var
 
 6. **Test the Installation**:  
    - The script verifies that the installation is not faulty by running tests on the VM.
+
+**Important Note**
+Currently, the VM and the snapshot required for this script exist only on the tonks machine. As a result, the script can only be run on this machine. In the future, we plan to set up a YAML-based script (or a similar automation tool) to run the entire process on this machine.
+This will eliminate the need for every user to set up a VM just to execute the script, making it more accessible and user-friendly.
 
 ---
 
@@ -148,3 +156,9 @@ The script relies on a configuration file (`automation_conf.json`) to define var
   - Verifying the OS version.
   
 ---
+
+## Contact
+If you have any questions or need assistance, feel free to contact me:
+
+Name: Shreejit C
+GitHub Username: Shreejit-03
