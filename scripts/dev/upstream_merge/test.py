@@ -80,14 +80,14 @@ def restore_snapshot(VM_name, snapshot_name):
     Restore the VM to the specified snapshot.
     """
     print(f"Restoring to {snapshot_name} snapshot...")
-    return execute(f'VBoxManage snapshot \"{VM_name}\" restore {snapshot_name}')
+    return execute_and_stream_cmd_output(f'VBoxManage snapshot \"{VM_name}\" restore {snapshot_name}')
 
 def start_VM(VM_name):
     """
     Start the VM in headless mode.
     """
     print("Starting the VM...")
-    return execute(f"VBoxManage startvm \"{VM_name}\" --type headless")
+    return execute_and_stream_cmd_output(f"VBoxManage startvm \"{VM_name}\" --type headless")
 
 def copy_image(filename ,ssh_connection):
     """
@@ -95,25 +95,25 @@ def copy_image(filename ,ssh_connection):
     """
     print("Copying image to target machine...")
     current_directory = os.getcwd()
-    return execute(f"scp {current_directory}/build/tmp-glibc/deploy/images/x64/{filename} {ssh_connection}:/home/admin")
+    return execute_and_stream_cmd_output(f"scp {current_directory}/build/tmp-glibc/deploy/images/x64/{filename} {ssh_connection}:/home/admin")
 
 def extract_and_install_safemode_image(ssh_connection):
     """
     Extract and install the safemode image on the target machine.
     """
     print("Extracting safemode image on target machine...")
-    return execute(f'ssh {ssh_connection} "tar xf nilrt-safemode-rootfs-x64.tar.gz -C /boot/.safe/"')
+    return execute_and_stream_cmd_output(f'ssh {ssh_connection} "tar xf nilrt-safemode-rootfs-x64.tar.gz -C /boot/.safe/"')
 
 def extract_and_install_runmode_image(ssh_connection):
     """
     Extract and install the runmode image on the target machine.
     """
     print("Extracting runmode image on target machine...")
-    first_cmd = execute(f'ssh {ssh_connection} "tar xf /home/admin/nilrt-base-system-image-x64.tar"')
+    first_cmd = execute_and_stream_cmd_output(f'ssh {ssh_connection} "tar xf /home/admin/nilrt-base-system-image-x64.tar"')
     if first_cmd[0] != 0:
         return first_cmd
     
-    second_cmd = execute(f'ssh {ssh_connection} "tar xf data.tar.gz -C /mnt/userfs && ./postinst"')
+    second_cmd = execute_and_stream_cmd_output(f'ssh {ssh_connection} "tar xf data.tar.gz -C /mnt/userfs && ./postinst"')
     if second_cmd[0] != 0:
         return second_cmd
     return (0, None)
@@ -123,21 +123,21 @@ def reboot_machine(ssh_connection):
     Reboot the target machine.
     """
     print("Rebooting the machine...")
-    return execute(f'ssh {ssh_connection} "reboot"')
+    return execute_and_stream_cmd_output(f'ssh {ssh_connection} "reboot"')
 
 def verify_OS_version(ssh_connection):
     """
     Verify the OS version on the target machine.
     """
     print("Verifying OS version...")
-    return execute(f'ssh {ssh_connection} "cat /etc/os-release"')
+    return execute_and_stream_cmd_output(f'ssh {ssh_connection} "cat /etc/os-release"')
 
 def poweroff_VM(VM_name):
     """
     Power off the VM.
     """
     print("Powering off the VM...")
-    return execute(f"VBoxManage controlvm \"{VM_name}\" poweroff")
+    return execute_and_stream_cmd_output(f"VBoxManage controlvm \"{VM_name}\" poweroff")
 
 if __name__ == "__main__":
     VM_name = "NILRTAgain"

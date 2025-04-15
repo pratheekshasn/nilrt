@@ -29,7 +29,7 @@ def run_command(command, capture_output=True):
         logger.critical("Exception running command: %s", str(e))
         return 1, f"Error running command '{command}': {str(e)}"
     
-def execute(command):
+def execute_and_stream_cmd_output(command):
     """
     Execute a command and yield its output line by line in real-time.
 

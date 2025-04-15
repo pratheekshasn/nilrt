@@ -46,7 +46,7 @@ def switch_to_base_branch_and_pull(git_obj,force_checkout):
         print(f"\n    Branch {git_obj.local_base_branch} does not exist. Exiting")
         return (1,f"\n    Branch {git_obj.local_base_branch} does not exist. Exiting")
     
-    if git_obj.checkout_branch(git_obj.local_base_branch,force_checkout)[0] != 0:
+    if git_obj.checkout_branch(git_obj.local_base_branch,force_checkout=force_checkout)[0] != 0:
         print(f"\n    Error switching to branch {git_obj.local_base_branch}. Exiting")
         return (1,f"\n    Error switching to branch {git_obj.local_base_branch}. Exiting")
     
@@ -72,7 +72,7 @@ def create_merge_branch(git_obj,merge_branch_name):
         git_obj.checkout_branch(git_obj.local_base_branch)
         git_obj.delete_branch(merge_branch_name)
 
-    if git_obj.checkout_branch(merge_branch_name)[0] != 0:
+    if git_obj.checkout_branch(merge_branch_name,create=True)[0] != 0:
         print(f"\n    Error creating {merge_branch_name}. Exiting")
         return (1,f"\n    Error creating {merge_branch_name}. Exiting")
     
@@ -167,6 +167,25 @@ def format_status(status, message):
             return " ... OK", "", f" ... OK\n    {message}\n\n\n"
         
 def format_merge_report(merge_report, email_log_level):
+    """
+    The formatted report string is structured as follows:
+    - The first line contains the repository name.
+    - The second line contains the status of the merge (OK, ERRORS, or no changes).
+    - The diff are added if there are any changes and if email_log_level is set to 1.
+
+    Merge completed successfully:
+    sources/bitbake
+    ... OK
+         Push and PR ... OK
+
+    No changes were detected during the merge:
+    sources/bitbake
+    ... OK (no changes)
+
+    Errors occurred during the merge:
+    sources/bitbake
+    ... ERRORS
+    """
     min_detail = ""
     error_detail = ""
     additional_detail = ""
@@ -201,7 +220,7 @@ def format_merge_report(merge_report, email_log_level):
         additional_detail += f"\nBuild and Test\n ... ERRORS\n    {build_and_test_detail[1]}\n"
     
     if email_log_level == 0:
-        return min_detail
+        return min_detail + "\n\n" + error_detail
     return min_detail + "\n\n" + error_detail + "\n\n" + additional_detail
 
 def merge_submodules_with_upstream(conf_file, force_checkout, forks, upstream_repo_name, merge_branch_name, skip_merge):
@@ -278,7 +297,7 @@ def main():
     conf_file, force_checkout, forks, upstream_repo_name, merge_branch_name, email_from, email_to, email_log_level, log_level, work_item_id, vm_name, snapshot_name = parse_config_file(config_file_path)    
     
     setup_logging(log_level)
-
+    
     pull_from_nilrt_details = pull_from_nilrt()
     if pull_from_nilrt_details[0] != 0:
         print(pull_from_nilrt_details[1])

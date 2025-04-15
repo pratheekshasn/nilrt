@@ -36,7 +36,7 @@ def start_docker_setup():
     :return: A tuple (status_code, message). Returns (0, None) on success.
     """
     print("\nStarting Docker setup...\n")
-    return execute("bash ./docker/create-build-nilrt.sh")
+    return execute_and_stream_cmd_output("bash ./docker/create-build-nilrt.sh")
 
 def build_core_feeds():
     """
@@ -45,7 +45,7 @@ def build_core_feeds():
     :return: A tuple (status_code, message). Returns (0, None) on success.
     """
     print("\nBuilding core feeds...\n")
-    return execute("bash scripts/pipelines/build.core-feeds.sh")
+    return execute_and_stream_cmd_output("bash scripts/pipelines/build.core-feeds.sh")
 
 def build_core_images():
     """
@@ -54,7 +54,7 @@ def build_core_images():
     :return: A tuple (status_code, message). Returns (0, None) on success.
     """
     print("\nBuilding core images...\n")
-    return execute("bash scripts/pipelines/build.core-images.sh")
+    return execute_and_stream_cmd_output("bash scripts/pipelines/build.core-images.sh")
 
 if __name__ == "__main__":
     status_code, message = build_images()

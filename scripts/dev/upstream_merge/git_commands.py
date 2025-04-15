@@ -26,23 +26,6 @@ def git_commit(message, amend=False, capture_output=True):
         command = f"git commit -m \"{message}\""
     return run_command(command, capture_output)
 
-def get_current_commit(capture_output=True):
-    """
-    Get the current HEAD commit hash.
-    :param capture_output: Whether to capture the command output.
-    :return: The current commit hash.
-    """
-    return run_command("git rev-parse HEAD", capture_output)[1]
-
-def branch_exists(branch_name, capture_output=True):
-    """
-    Check if a branch exists locally.
-    :param branch_name: Name of the branch to check.
-    :param capture_output: Whether to capture the command output.
-    :return: True if the branch exists, False otherwise.
-    """
-    return run_command(f"git rev-parse --verify {branch_name}", capture_output)[0] == 0
-
 def git_push(remote_repo_name="origin", branch="main", force=False, delete=False, capture_output=True):
     """
     Push changes to a remote repository.
@@ -94,14 +77,14 @@ def git_branch(branch_name, show_current=False, create=False, delete=False, capt
         command = "git branch"
     return run_command(command, capture_output)
 
-def git_checkout(branch_name, force_checkout=False, capture_output=True):
+def git_checkout(branch_name, create=False, force_checkout=False, capture_output=True):
     """
     Checkout a branch, creating it if it doesn't exist.
     :param branch_name: Name of the branch to checkout.
     :param force_checkout: Whether to force checkout.
     :param capture_output: Whether to capture the command output.
     """
-    if not branch_exists(branch_name):
+    if create:
         git_branch(branch_name, create=True)
     if force_checkout:
         command = f"git checkout -f {branch_name}"

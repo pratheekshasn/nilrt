@@ -6,7 +6,7 @@ This script automates the process of merging upstream changes, building images, 
 
 ## **Steps to Run the Script**
 
-### **1. Navigate to the `nilrt` Directory**
+### **1. Navigate to the root of the nilrt repo**
 ```bash
 cd ~/nilrt
 ```
@@ -16,7 +16,7 @@ cd ~/nilrt
 #### **To Perform a Merge**
 This will merge upstream changes, build the images, and test them:
 ```bash
-python3 scripts/dev/upstream_merge/upstream_merge.py -c scripts/dev/upstream_merge/automation_conf.json
+python3 scripts/dev/upstream_merge/upstream_merge.py
 ```
 
 #### **To Skip the Merge and Only Build and Test**
@@ -30,15 +30,15 @@ python3 scripts/dev/upstream_merge/upstream_merge.py -c scripts/dev/upstream_mer
 ## **Configuration File: `automation_conf.json`**
 
 The script relies on a configuration file (`automation_conf.json`) to define various parameters. Below is an explanation of the fields in the configuration file:
-
+ 
 - **`conf_file_path`**:  
-  Path to the configuration file (default: `repos.conf`). This file must be located in the `/scripts/dev/upstream_merge/` folder.
+  Path to the configuration file (default: [`repos.conf`](./repos.conf)).
 
 - **`force_checkout`**:  
   Enables forceful checkout to the base branch if set to `True`.
 
 - **`forks`**:  
-  A dictionary where the keys are local repository names (as mentioned in `repos.conf`) and the values are the URLs of your forks.
+  A dictionary where the keys are local repository names (as mentioned in `repos.conf`(./repos.conf)) and the values are the URLs of your forks.
 
 - **`upstream_repo_name`**:  
   The name of the upstream remote repository.
@@ -53,8 +53,18 @@ The script relies on a configuration file (`automation_conf.json`) to define var
   The email address to which the merge report will be sent.
 
 - **`email_log_level`**:  
-  - `0`: Minimal information will be included in the email.  
-  - `1`: Additional detailed information will be included in the email.
+  - **`0`**:  
+    - Includes the status of the upstream merge:  
+      - **`... OK`**: Merge completed successfully.  
+      - **`... OK (no changes)`**: No changes were detected during the merge.  
+      - **`... ERRORS`**: Errors occurred during the merge.  
+    - In case of a merge conflict, the error details will also be included in the email.
+
+  - **`1`**:  
+    - Includes the diff (differences) for a successful merge in addition to the status.
+
+---
+
 
 - **`log_level`**:  
   Integer representing the logging level:  
@@ -80,10 +90,10 @@ The script relies on a configuration file (`automation_conf.json`) to define var
 ### **Workflow for Each Submodule in the `nilrt` Repository**
 
 1. **Check Out the Base Branch**:  
-   - The script checks out the base branch as specified in the `repos.conf` file.
+   - The script checks out the base branch as specified in the `repos.conf`(./repos.conf) file.
 
 2. **Pull the Upstream Branch**:  
-   - The upstream branch mentioned in `repos.conf` is pulled to ensure the latest changes are fetched.
+   - The upstream branch mentioned in `repos.conf`(./repos.conf) is pulled to ensure the latest changes are fetched.
 
 3. **Merge the Two Branches**:  
    - The base branch and the upstream branch are merged.
@@ -99,10 +109,6 @@ The script relies on a configuration file (`automation_conf.json`) to define var
 
 6. **Test the Installation**:  
    - The script verifies that the installation is not faulty by running tests on the VM.
-
----
-
-This structure makes the workflow easier to follow and understand. Let me know if you need further adjustments!
 
 ---
 
