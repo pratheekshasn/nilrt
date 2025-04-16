@@ -18,13 +18,21 @@ class GitRepo:
         """
         return run_command("git rev-parse HEAD")[1]
     
-    def branch_exists(branch_name, capture_output=True):
+    def branch_exists(self, branch_name, fork_name = None, remote=False, capture_output=True):
         """
         Check if a branch exists locally.
         :param branch_name: Name of the branch to check.
         :param capture_output: Whether to capture the command output.
         :return: True if the branch exists, False otherwise.
         """
+        if remote:
+            if fork_name is None:
+                fork_name = self.upstream_repo_name
+            result = run_command(f"git ls-remote --heads {fork_name} {branch_name}", capture_output)
+            if result[0] == 0:
+                return result != (0,'')
+            return  False
+        
         return run_command(f"git rev-parse --verify {branch_name}", capture_output)[0] == 0
     
     def checkout_branch(self, branch_name, create = False, force_checkout = False):

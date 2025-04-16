@@ -135,9 +135,10 @@ def push_branch(git_obj,merge_branch_name):
         print(f"\n    Error adding remote repository {git_obj.fork_name} using {git_obj.fork_url}. Exiting")
         return (1,f"\n    Error adding remote repository {git_obj.fork_name} using {git_obj.fork_url}. Exiting")
     
-    if git_obj.push(merge_branch_name, git_obj.fork_name, delete=True)[0] != 0:
-        print(f"\n    Failed to delete branch {merge_branch_name} on {git_obj.fork_name}")
-        return (1, f"\n    Failed to delete branch {merge_branch_name} on {git_obj.fork_name}")
+    if git_obj.branch_exists(merge_branch_name,git_obj.fork_name,remote=True):
+        if git_obj.push(merge_branch_name, git_obj.fork_name, delete=True)[0] != 0:
+            print(f"\n    Failed to delete branch {merge_branch_name} on {git_obj.fork_name}")
+            return (1, f"\n    Failed to delete branch {merge_branch_name} on {git_obj.fork_name}")
     
     if git_obj.push(merge_branch_name, git_obj.fork_name)[0] != 0:
         print(f"\n    Failed to push branch {merge_branch_name} to {git_obj.fork_name}")
@@ -204,7 +205,7 @@ def format_merge_report(merge_report, email_log_level):
             git_obj_push_details = push_and_PR_details[git_obj]
             if git_obj_push_details[0] == 0:
                 min_detail += "     Push and PR ... OK\n"
-                diff_detail += f"     Push and PR ... OK\n    {git_obj_push_details[1]}\n"
+                diff_detail += f"     Push and PR ... OK\n"
             else:
                 min_detail += "     Push and PR ... ERRORS\n"
                 error_detail += f"{git_obj.local_repo}\n{min_line}\n     Push and PR ... ERRORS\n    {git_obj_push_details[1]}\n"
