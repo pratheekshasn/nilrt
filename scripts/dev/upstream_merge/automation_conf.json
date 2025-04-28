@@ -1,22 +1,8 @@
 {
+    "NILRT_branch":"nilrt/master/scarthgap",
     "conf_file_path": "scripts/dev/upstream_merge/repos.conf",
     "force_checkout": false,
-    "forks":
-    {
-            "sources/bitbake": "https://github.com/Shreejit-03/bitbake.git",
-            "sources/meta-cloud-services": "https://github.com/Shreejit-03/meta-cloud-services.git",
-            "sources/meta-openembedded": "https://github.com/Shreejit-03/meta-openembedded.git",
-            "sources/meta-selinux": "https://github.com/Shreejit-03/meta-selinux.git",
-            "sources/openembedded-core": "https://github.com/Shreejit-03/openembedded-core.git",
-            "sources/meta-virtualization": "https://github.com/Shreejit-03/meta-virtualization.git",
-            "sources/meta-security": "https://github.com/Shreejit-03/meta-security.git",
-            "sources/meta-sdr": "https://github.com/Shreejit-03/meta-sdr.git",
-            "sources/meta-qt5": "https://github.com/Shreejit-03/meta-qt5.git",
-            "sources/meta-qt5-extra": "https://github.com/Shreejit-03/meta-qt5-extra.git",
-            "sources/meta-rauc": "https://github.com/Shreejit-03/meta-rauc.git",
-            "sources/pyrex": "https://github.com/Shreejit-03/pyrex.git",
-            "sources/meta-mingw": "https://github.com/Shreejit-03/meta-mingw.git"
-        },
+    "username": "Shreejit-03",
     "upstream_repo_name": "automerge_upstream",
     "merge_branch_name": "dev/automerge/ni",
     "email_from": "shreejit.c@emerson.com",

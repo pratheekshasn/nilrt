@@ -45,7 +45,7 @@ def build_core_feeds():
     :return: A tuple (status_code, message). Returns (0, None) on success.
     """
     print("\nBuilding core feeds...\n")
-    return execute_and_stream_cmd_output("bash scripts/pipelines/build.core-feeds.sh")
+    return execute_and_stream_cmd_output("bash scripts/pipelines/build.clean-core-feeds.sh")
 
 def build_core_images():
     """

@@ -38,14 +38,17 @@ python3 scripts/dev/upstream_merge/upstream_merge.py -skip-merge True
 
 The script relies on a configuration file (`automation_conf.json`) to define various parameters. **All fields are required**, and if a field is not present, None will be used as the default value. Below is an explanation of the fields in the configuration file:
  
+- **`NILRT_branch`**:
+  The nilrt branch to pull the latest changes from.
+
 - **`conf_file_path`**:  
   Path to the configuration file (default: [`repos.conf`](./repos.conf)).
 
 - **`force_checkout`**:  
   Enables forceful checkout to the base branch if set to `True`.
 
-- **`forks`**:  
-  A dictionary where the keys are local repository names (as mentioned in [`repos.conf`](./repos.conf)) and the values are the URLs of your forks.
+- **`username`**:  
+  GitHub username where the forks are maintained.
 
 - **`upstream_repo_name`**:  
   The name of the upstream remote repository.
