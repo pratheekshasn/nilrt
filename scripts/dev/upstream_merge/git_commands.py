@@ -148,7 +148,7 @@ def git_diff(target="HEAD", compare_with=None, staged=False, capture_output=True
         command = "git diff --staged" if staged else "git diff"
     return run_command(command, capture_output)
 
-def git_pull_request(title, body="", base_branch="main", head_branch=None, capture_output=True):
+def git_pull_request(title, body="",repo="" ,base_branch="main", head_branch=None, capture_output=True):
     """
     Create a pull request using the GitHub CLI.
     :param title: Title of the pull request.
@@ -159,7 +159,10 @@ def git_pull_request(title, body="", base_branch="main", head_branch=None, captu
     """
     if head_branch is None:
         head_branch = run_command("git rev-parse --abbrev-ref HEAD", capture_output=True)
-    command = f"gh pr create --title \"{title}\" --body \"{body}\" --base {base_branch} --head {head_branch}"
+    if repo == "":
+        command = f"gh pr create --title \"{title}\" --body \"{body}\" --base {base_branch} --head {head_branch}"
+    else:
+        command = f"gh pr create --repo {repo} --title \"{title}\" --body \"{body}\" --base {base_branch} --head {head_branch}"
     return run_command(command, capture_output)
 
 def send_email(to, subject, file):

@@ -1,3 +1,9 @@
+# MOTIVATION
+
+To ensure the long-term maintainability and efficiency of the ni/nilrt repository, automating the upstream merge process is a crucial step. Manual upstream merges are often tedious, time-consuming, and prone to human error, especially as the size and frequency of upstream changes grow. By automating this process, we can significantly reduce the cost of maintenance by saving several hours of manual effort per release cycle. This allows developers to focus more on value-adding tasks rather than routine integration work. Automation also ensures that our fork stays closely aligned with upstream changes, minimizing future integration conflicts and making it easier to adopt new features, security patches, and bug fixes promptly. Overall, this improves the quality, stability, and security of the codebase while enhancing the team's productivity and responsiveness to upstream evolution.
+
+---
+
 # HOW TO USE THE MERGE SCRIPT
 
 This script automates the process of merging upstream changes, building images, and testing them on a virtual machine (VM). Follow the steps below to use the script effectively.
