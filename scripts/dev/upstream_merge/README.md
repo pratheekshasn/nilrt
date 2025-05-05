@@ -6,7 +6,7 @@ To ensure the long-term maintainability and efficiency of the ni/nilrt repositor
 
 # HOW TO USE THE MERGE SCRIPT
 
-This script automates the process of merging upstream changes, building images, and testing them on a virtual machine (VM). Follow the steps below to use the script effectively.
+This script automates the process of merging upstream changes, building images, and testing them on a virtual machine. Follow the steps below to use the script effectively.
 
 ---
 
@@ -23,7 +23,7 @@ Note:
 If the configuration file is automation_conf.json, you do not need to specify its path explicitly, as it is the default. However, if you are using a different configuration file, you must provide its path using the -c argument.For example:
 
 ```bash
-python3 scripts/dev/upstream_merge/upstream_merge.py -c path/to/your_config.json -skip-merge True
+python3 scripts/dev/upstream_merge/upstream_merge.py -c path/to/your_config.json
 ```
 
 #### **To Perform a Merge**
@@ -42,7 +42,7 @@ python3 scripts/dev/upstream_merge/upstream_merge.py -skip-merge True
 
 ## **Configuration File: `automation_conf.json`**
 
-The script relies on a configuration file (`automation_conf.json`) to define various parameters. **All fields are required**, and if a field is not present, None will be used as the default value. Below is an explanation of the fields in the configuration file:
+The script relies on a configuration file (`automation_conf.json`) to define various parameters. **All fields are required**, and if a field is not present, `None` will be used as the default value. Below is an explanation of the fields in the configuration file:
  
 - **`NILRT_branch`**:
   The nilrt branch to pull the latest changes from.
@@ -53,14 +53,17 @@ The script relies on a configuration file (`automation_conf.json`) to define var
 - **`force_checkout`**:  
   Enables forceful checkout to the base branch if set to `True`.
 
-- **`username`**:  
-  GitHub username where the forks are maintained.
-
 - **`upstream_repo_name`**:  
   The name of the upstream remote repository.
 
 - **`merge_branch_name`**:  
   The name of the branch where the merge will be performed.
+
+- **`username`**:  
+  GitHub username where the forks are maintained.
+
+- **`fork_name`**:
+  The name of the downstream fork repository where the merge will be performed. This is the repository owned by the user specified in the username field.
 
 - **`email_from`**:  
   The email address from which the merge report will be sent.
@@ -118,7 +121,7 @@ The script relies on a configuration file (`automation_conf.json`) to define var
      - **Runmode Image**
 
 5. **Install Images on the RT Target (VM)**:  
-   - The safemode and runmode images are installed on a Real-Time (RT) target, which is a Virtual Machine (VM) in this case.
+   - The safemode and runmode images are installed on a Real-Time (RT) target, which is a Virtual Machine in this case.
 
 6. **Test the Installation**:  
    - The script verifies that the installation is not faulty by running tests on the VM.
@@ -167,7 +170,13 @@ This will eliminate the need for every user to set up a VM just to execute the s
 ---
 
 ## Contact
-If you have any questions or need assistance, feel free to contact me:
+Contact
+If you have any questions or need assistance, feel free to contact:
 
-Name: Shreejit C
-GitHub Username: Shreejit-03
+- Name: Shreejit C
+  - GitHub Username: Shreejit-03
+  - Email: shreejit.c@emerson.com
+
+- Name: Pratheeksha S N
+  - GitHub Username: pratheekshasn
+  - Email: pratheeksha.s.n@emerson.com

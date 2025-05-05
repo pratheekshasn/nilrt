@@ -1,15 +1,15 @@
 #!/bin/bash
 
-SCRIPT_ROOT=$(realpath $(dirname $BASH_SOURCE))
+SCRIPT_ROOT=$(realpath $(dirname "${BASH_SOURCE[0]}"))
+
+SCRIPT_ROOT1=${SCRIPT_ROOT}
 
 . "${SCRIPT_ROOT}/build.common.sh"
 
 echo "INFO: Cleaning and building the core package feed."
+
 bitbake -c cleanall packagefeed-ni-core
 bitbake -c cleanall package-index
 bitbake -c cleanall linux-nilrt
 
-echo "INFO: Building the core package feed."
-bitbake packagefeed-ni-core
-bitbake package-index
-bitbake linux-nilrt
+. "${SCRIPT_ROOT1}/build.core-feeds.sh"

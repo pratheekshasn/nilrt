@@ -8,12 +8,10 @@ def OS_test(VM_name, snapshot_name):
     Steps:
     1. Restore the VM to a specific snapshot.
     2. Start the VM.
-    3. Copy and install the safemode image.
-    4. Reboot the machine.
-    5. Copy and install the runmode image.
-    6. Reboot the machine again.
-    7. Verify the OS version.
-    8. Power off the VM.
+    3. Copy, extract and install the safemode image.
+    4. Copy, extract and install the runmode image.
+    5. Verify the OS version.
+    6. Power off the VM.
     """
     username="admin"
     target="NI-cRIO-903x-VM-27108694"
@@ -31,7 +29,29 @@ def OS_test(VM_name, snapshot_name):
     
     time.sleep(5)  # Wait for the VM to stabilize
     
-    # Step 3: Copy and install the safemode image
+    # Step 3: Copy, extract and install the safemode image
+    install_safemode= install_safemode_image(ssh_connection)
+    if install_safemode[0] != 0:
+        return install_safemode
+    
+    # Step 4: Copy, extract and install the runmode image
+    install_runmode = install_runmode_image(ssh_connection)
+    if install_runmode[0] != 0:
+        return install_runmode
+    
+    # Step 5: Verify the OS version
+    os_version = verify_OS_version(ssh_connection)
+    if os_version[0] != 0:
+        return os_version
+    
+    # Step 6: Power off the VM
+    poweroff = poweroff_VM(VM_name)
+    if poweroff[0] != 0:
+        return poweroff
+    
+    return os_version
+
+def install_safemode_image(ssh_connection):
     copy = copy_image("nilrt-safemode-rootfs-x64.tar.gz" , ssh_connection)
     if copy[0] != 0:
         return copy
@@ -40,14 +60,15 @@ def OS_test(VM_name, snapshot_name):
     if extract_and_install[0] != 0:
         return extract_and_install
     
-    # Step 4: Reboot the machine
     reboot = reboot_machine(ssh_connection)
     if reboot[0] != 0:
         return reboot
 
     time.sleep(90)  # Wait for the machine to reboot
-    
-    # Step 5: Copy and install the runmode image
+
+    return (0, None)
+
+def install_runmode_image(ssh_connection):
     copy = copy_image("nilrt-base-system-image-x64.tar" , ssh_connection)
     if copy[0] != 0:
         return copy
@@ -56,24 +77,13 @@ def OS_test(VM_name, snapshot_name):
     if extract_and_install[0] != 0:
         return extract_and_install
 
-    # Step 6: Reboot the machine again
     reboot = reboot_machine(ssh_connection)
     if reboot[0] != 0:
         return reboot
 
-    time.sleep(90)  # Wait for the machine to reboot again
-    
-    # Step 7: Verify the OS version
-    os_version = verify_OS_version(ssh_connection)
-    if os_version[0] != 0:
-        return os_version
-    
-    # Step 8: Power off the VM
-    poweroff = poweroff_VM(VM_name)
-    if poweroff[0] != 0:
-        return poweroff
-    
-    return os_version
+    time.sleep(90)  # Wait for the machine to reboot
+
+    return (0, None)
 
 def restore_snapshot(VM_name, snapshot_name):
     """
