@@ -29,4 +29,4 @@ jobs:
     steps:
     # Runs a single command using the runners shell
     - name: Run Python debug script
-      run:  python3 ${{ inputs.filename }}"
+      run:  python3 ${{ inputs.filename }}
