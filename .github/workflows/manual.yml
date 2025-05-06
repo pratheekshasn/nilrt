@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       filename:
-        description: 'Provide the path to the debug script'
+        description: 'Provide the path to the upstream merge script'
         default: 'scripts/dev/upstream_merge/upstream_merge_and_test.py'
         required: true
         type: string
@@ -18,8 +18,11 @@ jobs:
       with:
         ref: ${{ github.ref }}   # Ensures the correct branch (e.g., automation2) is used
     
-    - name: List repo contents
+    - name: List git config
       run: git config --list
+    
+    - name: set git pull
+      run: git config pull.rebase false
 
     - name: Run Python upstream merge script
       run: python3 ${{ inputs.filename }}
