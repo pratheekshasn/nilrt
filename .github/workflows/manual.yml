@@ -8,11 +8,11 @@ on:
   workflow_dispatch:
     # Inputs the workflow accepts.
     inputs:
-      name:
+      filename:
         # Friendly description to be shown in the UI instead of 'name'
-        description: 'Person to greet'
+        description: 'Provide the path to the debug script'
         # Default value if no value is explicitly provided
-        default: 'World'
+        default: '/scripts/dev/upstream_merge/debug.py'
         # Input has to be provided for the workflow to run
         required: true
         # The data type of the input
@@ -28,5 +28,5 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     # Runs a single command using the runners shell
-    - name: Send greeting
-      run: echo "Hello ${{ inputs.name }}"
+    - name: Run Python debug script
+      run:  python3 ${{ inputs.filename }}"
