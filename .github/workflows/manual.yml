@@ -26,5 +26,8 @@ jobs:
     - name: Print working directory
       run: pwd
     
+    - name: list sub-directories
+      run: ls
+      
     - name: Run Python debug script
       run: python3 ${{ inputs.filename }}
