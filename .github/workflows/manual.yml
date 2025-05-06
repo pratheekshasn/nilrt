@@ -12,7 +12,7 @@ on:
         # Friendly description to be shown in the UI instead of 'name'
         description: 'Provide the path to the debug script'
         # Default value if no value is explicitly provided
-        default: '/scripts/dev/upstream_merge/debug.py'
+        default: 'scripts/dev/upstream_merge/debug.py'
         # Input has to be provided for the workflow to run
         required: true
         # The data type of the input
