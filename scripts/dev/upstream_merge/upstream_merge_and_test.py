@@ -315,10 +315,10 @@ def main():
     
     setup_logging(json_config_obj.log_level)
     
-    # pull_from_nilrt_details = pull_from_nilrt(json_config_obj.NILRT_branch) # To ensure that the NILRT branch is up to date in case files like 'repos.conf' are modified, which would be crucial to the current script
-    # if pull_from_nilrt_details[0] != 0:
-    #     print(pull_from_nilrt_details[1])
-    #     return
+    pull_from_nilrt_details = pull_from_nilrt(json_config_obj.NILRT_branch) # To ensure that the NILRT branch is up to date in case files like 'repos.conf' are modified, which would be crucial to the current script
+    if pull_from_nilrt_details[0] != 0:
+        print(pull_from_nilrt_details[1])
+        return
     
     merge_report = merge_submodules_with_upstream(json_config_obj.conf_file, json_config_obj.force_checkout, json_config_obj.username, json_config_obj.upstream_repo_name, json_config_obj.merge_branch_name, json_config_obj.fork_name, skip_merge)
     
