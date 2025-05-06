@@ -18,6 +18,7 @@ jobs:
       with:
         fetch-depth: 0
         ref: ${{ github.ref }}   # Ensures the correct branch (e.g., automation2) is used
+        submodules: recursive
       
     - name: List git config
       run: git config --list
