@@ -10,8 +10,8 @@ on:
         type: string
 
 jobs:
-  test_run_a_python_script:
-    runs-on: ubuntu-latest
+  Run_upstream_merge_and_test_script:
+    runs-on: self-hosted
     steps:
     - name: Checkout current branch
       uses: actions/checkout@v3
@@ -22,9 +22,6 @@ jobs:
       
     - name: List git config
       run: git config --list
-    
-    - name: set git pull
-      run: git config pull.rebase false
 
     - name: Run Python upstream merge script
       run: python3 ${{ inputs.filename }}

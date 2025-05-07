@@ -322,14 +322,14 @@ def main():
     
     merge_report = merge_submodules_with_upstream(json_config_obj.conf_file, json_config_obj.force_checkout, json_config_obj.username, json_config_obj.upstream_repo_name, json_config_obj.merge_branch_name, json_config_obj.fork_name, skip_merge)
     
-    # merge_has_errors = any(status != 0 for status, _ in merge_report.values())
+    merge_has_errors = any(status != 0 for status, _ in merge_report.values())
 
-    # build_and_test_details = build_and_test(json_config_obj.vm_name, json_config_obj.snapshot_name,merge_has_errors)
+    build_and_test_details = build_and_test(json_config_obj.vm_name, json_config_obj.snapshot_name,merge_has_errors)
 
-    # merge_report = push_and_PR_prepare(merge_has_errors, build_and_test_details , merge_report ,json_config_obj.merge_branch_name ,json_config_obj.work_item_id, json_config_obj.username)
-    # merge_report["Build and Test"] = build_and_test_details
+    merge_report = push_and_PR_prepare(merge_has_errors, build_and_test_details , merge_report ,json_config_obj.merge_branch_name ,json_config_obj.work_item_id, json_config_obj.username)
+    merge_report["Build and Test"] = build_and_test_details
     
-    # write_log_and_send_email(json_config_obj.email_from, json_config_obj.email_to, merge_report, json_config_obj.email_log_level)
+    write_log_and_send_email(json_config_obj.email_from, json_config_obj.email_to, merge_report, json_config_obj.email_log_level)
 
 def pull_from_nilrt(NILRT_branch="nilrt/master/scarthgap"):
     """
