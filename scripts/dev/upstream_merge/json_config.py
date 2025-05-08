@@ -9,7 +9,7 @@ class json_config:
             print(f"Error loading config file: {e}")
             exit(1)
         self.NILRT_branch = config.get("NILRT_branch")
-        self.NILRT_branch = config.get("meta_nilrt_branch")
+        self.meta_nilrt_branch = config.get("meta_nilrt_branch")
         self.conf_file = os.getcwd()+f"/{config.get('conf_file_path')}"
         self.force_checkout = config.get("force_checkout")
         self.upstream_repo_name = config.get("upstream_repo_name")

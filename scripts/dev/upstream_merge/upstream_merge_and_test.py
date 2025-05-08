@@ -44,7 +44,12 @@ def switch_to_base_branch_and_pull(git_obj,force_checkout):
         print(checkout_details[1])
         return checkout_details
     
-    pull_latest_details = git_obj.pull_latest()
+    set_origin_details = git_obj.add_remote("origin",f"https://github.com/ni/" + git_obj.local_repo.split("/")[1] + ".git")
+    if set_origin_details[0] != 0:
+        print(set_origin_details[1])
+        return set_origin_details
+    
+    pull_latest_details = git_obj.pull_latest(branch_name=git_obj.local_base_branch,upstream_repo_name="origin")
     if pull_latest_details[0] != 0:
         print(pull_latest_details[1])
         return pull_latest_details
@@ -98,7 +103,8 @@ def prepare_for_merge(git_obj, merge_branch_name, force_checkout):
 def merge_upstream(git_obj,force_checkout, merge_branch_name, skip_merge):
     if skip_merge:
         return (0," Has Been Skipped")
-    
+    print(f"{git_obj.local_repo}\n")
+
     merge_prepare_details = prepare_for_merge(git_obj,merge_branch_name,force_checkout)
     
     if merge_prepare_details[0] != 0:
@@ -261,13 +267,9 @@ def write_log_and_send_email(email_from, email_to, merge_report, email_log_level
     write_log(email_log_file_name, formatted_report_string)
     send_email(to=email_to, subject="Merge Details", file=email_log_file_name)
 
-def build_and_test(vm_name, snapshot_name, merge_has_errors,meta_branch):
+def build_and_test(vm_name, snapshot_name, merge_has_errors):
     if merge_has_errors == True:
         return (1,"Merge has Errors")
-    pull_from_meta_nilrt_details = pull_from_base_branch(meta_branch,"https://github.com/ni/meta-nilrt.git") # To ensure that the meta-nilrt branch is up to date
-    if pull_from_meta_nilrt_details[0] != 0:
-        print(pull_from_meta_nilrt_details[1])
-        return
     success = build_images()
     if success[0] != 0:
         return success
@@ -315,7 +317,20 @@ def pull_from_base_branch(branch,upstream_URL):
         print(pull_latest_details[1])
         return pull_latest_details
     
-    return (0,None)   
+    return (0,None)
+
+def update_meta_nilrt_branch(meta_nilrt_branch):
+    """
+    Pull the latest changes from the meta-nilrt repository.
+    """
+    os.chdir("sources/meta-nilrt")
+    pull_from_meta_nilrt_details = pull_from_base_branch(meta_nilrt_branch,"https://github.com/ni/meta-nilrt.git") # To ensure that the meta-nilrt branch is up to date
+    if pull_from_meta_nilrt_details[0] != 0:
+        print(pull_from_meta_nilrt_details[1])
+        return pull_from_meta_nilrt_details
+    os.chdir("../..")
+    
+    return (0,None)
 
 def main():
     args = parse_args()
@@ -334,6 +349,8 @@ def main():
     merge_report = merge_submodules_with_upstream(json_config_obj.conf_file, json_config_obj.force_checkout, json_config_obj.username, json_config_obj.upstream_repo_name, json_config_obj.merge_branch_name, json_config_obj.fork_name, skip_merge)
     
     merge_has_errors = any(status != 0 for status, _ in merge_report.values())
+
+    update_meta_nilrt_branch(json_config_obj.meta_nilrt_branch)
 
     build_and_test_details = build_and_test(json_config_obj.vm_name, json_config_obj.snapshot_name,merge_has_errors)
 
