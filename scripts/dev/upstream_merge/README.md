@@ -18,24 +18,26 @@ cd ~/nilrt
 ```
 
 ### **2. Run the Script**
-
-Note:
-If the configuration file is automation_conf.json, you do not need to specify its path explicitly, as it is the default. However, if you are using a different configuration file, you must provide its path using the -c argument.For example:
-
-```bash
-python3 scripts/dev/upstream_merge/upstream_merge.py -c path/to/your_config.json
-```
-
 #### **To Perform a Merge**
 This will merge upstream changes, build the images, and test them:
 ```bash
-python3 scripts/dev/upstream_merge/upstream_merge.py
+python3 scripts/dev/upstream_merge/upstream_merge.py -w workItemID
 ```
+
+**`Note`**:
+- If the configuration file is `automation_conf.json`, you do not need to specify its path explicitly, as it is set as default. However, if you are using a different configuration file, you must provide its path using the `-c` argument.For example:
+
+```bash
+python3 scripts/dev/upstream_merge/upstream_merge.py -c path/to/your_config.json -w workItemID
+```
+
+- **`workItemID`**:  
+The `workItemID` associated with the pull request. If `workItemID` is not provided `None` will be used.
 
 #### **To Skip the Merge and Only Build and Test**
 If you want to skip the merge step and directly proceed with building and testing:
 ```bash
-python3 scripts/dev/upstream_merge/upstream_merge.py -skip-merge True
+python3 scripts/dev/upstream_merge/upstream_merge.py -w workItemID -s True
 ```
 
 ---
@@ -46,6 +48,9 @@ The script relies on a configuration file (`automation_conf.json`) to define var
  
 - **`NILRT_branch`**:
   The nilrt branch to pull the latest changes from.
+
+- **`meta_nilrt_branch`**:
+  The meta-nilrt branch to pull the latest changes from.
 
 - **`conf_file_path`**:  
   Path to the configuration file (default: [`repos.conf`](./repos.conf)).
@@ -88,10 +93,7 @@ The script relies on a configuration file (`automation_conf.json`) to define var
   - `20`: INFO  
   - `30`: WARNING  
   - `40`: ERROR  
-  - `50`: CRITICAL  
-
-- **`work_item_id`**:  
-  The work item ID associated with the pull request.
+  - `50`: CRITICAL
 
 - **`vm_name`**:  
   The name of the VM where the images will be tested.
@@ -166,6 +168,13 @@ This will eliminate the need for every user to set up a VM just to execute the s
   - Restoring the VM to a specific snapshot.
   - Installing and testing safemode and runmode images.
   - Verifying the OS version.
+
+### ** `json_config.py`**
+- Handles reading and validating the configuration file (`automation_conf.json`).
+- Key responsibilities include:
+  - Parsing the JSON configuration file.
+  - Validating required fields and their values.
+  - Providing easy access to configuration parameters for other scripts.
   
 ---
 

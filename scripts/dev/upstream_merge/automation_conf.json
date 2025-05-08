@@ -1,5 +1,6 @@
 {
     "NILRT_branch":"nilrt/master/scarthgap",
+    "meta_nilrt_branch":"nilrt/master/scarthgap",
     "conf_file_path": "scripts/dev/upstream_merge/repos.conf",
     "force_checkout": false,
     "upstream_repo_name": "automerge_upstream",
@@ -10,7 +11,6 @@
     "email_to": "shreejit.c@emerson.com",
     "email_log_level": 1,
     "log_level": 10,
-    "work_item_id": 2951036,
     "VM_name": "NILRTAgain",
     "snapshot_name": "Clean_SSHEnabled"
 }

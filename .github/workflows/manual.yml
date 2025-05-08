@@ -9,6 +9,12 @@ on:
         required: true
         type: string
 
+      workItemID:
+        description: 'Provide Work Item ID for the upstream merge script'
+        default: None
+        required: true
+        type: string
+
 jobs:
   Run_upstream_merge_and_test_script:
     runs-on: self-hosted
@@ -17,11 +23,8 @@ jobs:
       uses: actions/checkout@v3
       with:
         fetch-depth: 0
-        ref: ${{ github.ref }}   # Ensures the correct branch (e.g., automation2) is used
+        ref: ${{ github.ref }}   
         submodules: recursive
-      
-    - name: List git config
-      run: git config --list
 
     - name: Run Python upstream merge script
-      run: python3 ${{ inputs.filename }}
+      run: python3 ${{ inputs.filename }} -w ${{ inputs.workItemID }}

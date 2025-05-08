@@ -1,7 +1,6 @@
 import datetime
 import os
 import argparse
-import json
 import logging
 from json_config import json_config
 from GitRepo import *
@@ -12,21 +11,11 @@ from test import OS_test
 def parse_args():
     parser = argparse.ArgumentParser(description="Automated repository merging script")
     parser.add_argument("-c", type=str, help="Path to configuration file", default="scripts/dev/upstream_merge/automation_conf.json")
-    parser.add_argument("-skip-merge", type=bool, help="Skip merging with upstream", default=False)
+    parser.add_argument("-w", type=str, help="Skip merging with upstream", default=None)
+    parser.add_argument("-s", type=bool, help="Skip merging with upstream", default=False)
     args = parser.parse_args()
 
     return args
-
-def parse_config_file(config_file_path):
-    try:
-        with open(config_file_path, "r") as file:
-            config = json.load(file)
-    except (FileNotFoundError, json.JSONDecodeError) as e:
-        print(f"Error loading config file: {e}")
-        exit(1)
-    
-    json_config_obj =  json_config(config.get("NILRT_branch"), os.getcwd()+f"/{config.get('conf_file_path')}", config.get("force_checkout"), config.get("upstream_repo_name"), config.get("merge_branch_name"), config.get("username"), config.get("fork_name"), config.get("email_from"), config.get("email_to"), config.get("email_log_level"), config.get("log_level"), config.get("work_item_id"), config.get("VM_name"), config.get("snapshot_name"))
-    return json_config_obj
 
 def setup_logging(log_level=10):
     """
@@ -272,9 +261,13 @@ def write_log_and_send_email(email_from, email_to, merge_report, email_log_level
     write_log(email_log_file_name, formatted_report_string)
     send_email(to=email_to, subject="Merge Details", file=email_log_file_name)
 
-def build_and_test(vm_name, snapshot_name, merge_has_errors):
+def build_and_test(vm_name, snapshot_name, merge_has_errors,meta_branch):
     if merge_has_errors == True:
         return (1,"Merge has Errors")
+    pull_from_meta_nilrt_details = pull_from_base_branch(meta_branch,"https://github.com/ni/meta-nilrt.git") # To ensure that the meta-nilrt branch is up to date
+    if pull_from_meta_nilrt_details[0] != 0:
+        print(pull_from_meta_nilrt_details[1])
+        return
     success = build_images()
     if success[0] != 0:
         return success
@@ -306,16 +299,34 @@ def get_PR_description(work_item_id):
     - [ ] bitbake package-index && bitbake nilrt-base-system-image
     - [ ] Reimaged a cRIO with the new base image and successfully booted it"""
 
+def pull_from_base_branch(branch,upstream_URL):
+    """
+    Pull the latest changes from the NILRT repository.
+    """
+    git_obj = GitRepo()
+
+    add_remote_details = git_obj.add_remote("upstream",upstream_URL)
+    if add_remote_details[0] != 0:
+        print(add_remote_details[1])
+        return add_remote_details
+    
+    pull_latest_details = git_obj.pull_latest(branch,"upstream")
+    if pull_latest_details[0] != 0:
+        print(pull_latest_details[1])
+        return pull_latest_details
+    
+    return (0,None)   
+
 def main():
     args = parse_args()
-    skip_merge = args.skip_merge
+    skip_merge = args.s
     config_file_path = args.c
 
-    json_config_obj = parse_config_file(config_file_path)    
+    json_config_obj = json_config(config_file_path,workitemID=args.w)    
     
     setup_logging(json_config_obj.log_level)
     
-    pull_from_nilrt_details = pull_from_nilrt(json_config_obj.NILRT_branch) # To ensure that the NILRT branch is up to date in case files like 'repos.conf' are modified, which would be crucial to the current script
+    pull_from_nilrt_details = pull_from_base_branch(json_config_obj.NILRT_branch,"https://github.com/ni/nilrt.git") # To ensure that the NILRT branch is up to date in case files like 'repos.conf' are modified, which would be crucial to the current script
     if pull_from_nilrt_details[0] != 0:
         print(pull_from_nilrt_details[1])
         return
@@ -329,24 +340,7 @@ def main():
     merge_report = push_and_PR_prepare(merge_has_errors, build_and_test_details , merge_report ,json_config_obj.merge_branch_name ,json_config_obj.work_item_id, json_config_obj.username)
     merge_report["Build and Test"] = build_and_test_details
     
-    write_log_and_send_email(json_config_obj.email_from, json_config_obj.email_to, merge_report, json_config_obj.email_log_level)
-
-def pull_from_nilrt(NILRT_branch="nilrt/master/scarthgap"):
-    """
-    Pull the latest changes from the NILRT repository.
-    """
-    nilrt_obj = GitRepo()
-    add_remote_details = nilrt_obj.add_remote("upstream","https://github.com/ni/nilrt.git")
-    if add_remote_details[0] != 0:
-        print(add_remote_details[1])
-        return add_remote_details
-    
-    pull_latest_details = nilrt_obj.pull_latest(NILRT_branch,"upstream")
-    if pull_latest_details[0] != 0:
-        print(pull_latest_details[1])
-        return pull_latest_details
-    
-    return (0,None)    
+    write_log_and_send_email(json_config_obj.email_from, json_config_obj.email_to, merge_report, json_config_obj.email_log_level) 
     
 if __name__ == "__main__":
     main()
