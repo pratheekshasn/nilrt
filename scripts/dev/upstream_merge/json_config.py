@@ -8,6 +8,7 @@ class json_config:
         except (FileNotFoundError, json.JSONDecodeError) as e:
             print(f"Error loading config file: {e}")
             exit(1)
+        self.work_item_id = workitemID
         self.NILRT_branch = config.get("NILRT_branch")
         self.meta_nilrt_branch = config.get("meta_nilrt_branch")
         self.conf_file = os.getcwd()+f"/{config.get('conf_file_path')}"
@@ -20,6 +21,6 @@ class json_config:
         self.email_to = config.get("email_to")
         self.email_log_level = config.get("email_log_level")
         self.log_level = config.get("log_level")
-        self.work_item_id = workitemID
+        self.clean_build = config.get("clean_build")
         self.vm_name = config.get("vm_name")
         self.snapshot_name = config.get("snapshot_name")

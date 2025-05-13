@@ -11,6 +11,7 @@
     "email_to": "shreejit.c@emerson.com",
     "email_log_level": 1,
     "log_level": 10,
+    "clean_build": false,
     "VM_name": "NILRTAgain",
     "snapshot_name": "Clean_SSHEnabled"
 }

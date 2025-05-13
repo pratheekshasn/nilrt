@@ -267,10 +267,10 @@ def write_log_and_send_email(email_from, email_to, merge_report, email_log_level
     write_log(email_log_file_name, formatted_report_string)
     send_email(to=email_to, subject="Merge Details", file=email_log_file_name)
 
-def build_and_test(vm_name, snapshot_name, merge_has_errors):
+def build_and_test(clean_build, m_name, snapshot_name, merge_has_errors):
     if merge_has_errors == True:
         return (1,"Merge has Errors")
-    success = build_images()
+    success = build_images(clean_build)
     if success[0] != 0:
         return success
     success = OS_test(vm_name, snapshot_name)
@@ -352,7 +352,7 @@ def main():
 
     update_meta_nilrt_branch(json_config_obj.meta_nilrt_branch)
 
-    build_and_test_details = build_and_test(json_config_obj.vm_name, json_config_obj.snapshot_name,merge_has_errors)
+    build_and_test_details = build_and_test(json_config_obj.clean_build, json_config_obj.vm_name, json_config_obj.snapshot_name,merge_has_errors)
 
     merge_report = push_and_PR_prepare(merge_has_errors, build_and_test_details , merge_report ,json_config_obj.merge_branch_name ,json_config_obj.work_item_id, json_config_obj.username)
     merge_report["Build and Test"] = build_and_test_details

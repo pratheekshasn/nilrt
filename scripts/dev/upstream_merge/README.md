@@ -95,6 +95,9 @@ The script relies on a configuration file (`automation_conf.json`) to define var
   - `40`: ERROR  
   - `50`: CRITICAL
 
+- **`clean_build`**:
+  A boolean flag that determines whether to clean the build environment before starting the build process. If set to True, the script will remove all previous build artifacts to ensure a fresh build.
+  
 - **`vm_name`**:  
   The name of the VM where the images will be tested.
 

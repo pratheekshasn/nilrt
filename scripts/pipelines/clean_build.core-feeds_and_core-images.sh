@@ -13,3 +13,9 @@ bitbake -c cleanall package-index
 bitbake -c cleanall linux-nilrt
 
 . "${SCRIPT_ROOT1}/build.core-feeds.sh"
+
+bitbake -c cleanall nilrt-safemode-rootfs
+bitbake -c cleanall nilrt-base-system-image
+bitbake -c cleanall nilrt-recovery-media
+
+. "${SCRIPT_ROOT1}/build.core-images.sh"
