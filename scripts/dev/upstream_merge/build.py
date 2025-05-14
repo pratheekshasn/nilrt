@@ -22,12 +22,11 @@ def build_images(clean_build=False):
             return clean
         print("\nClean build feeds and images completed.")
     else:
-        print("\nSkipping clean build feeds and images step.")
-        # Step 2: Build the core feeds
-        core_feeds = build_core_feeds()
-        if core_feeds[0] != 0:
-            return core_feeds
-        print("\nCore feeds build completed.")   
+        # # Step 2: Build the core feeds
+        # core_feeds = build_core_feeds()
+        # if core_feeds[0] != 0:
+        #     return core_feeds
+        # print("\nCore feeds build completed.")   
 
         # Step 3: Build the core images
         core_images = build_core_images()
