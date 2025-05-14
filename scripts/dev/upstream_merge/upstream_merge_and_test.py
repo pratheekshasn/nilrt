@@ -267,7 +267,7 @@ def write_log_and_send_email(email_from, email_to, merge_report, email_log_level
     write_log(email_log_file_name, formatted_report_string)
     send_email(to=email_to, subject="Merge Details", file=email_log_file_name)
 
-def build_and_test(clean_build, m_name, snapshot_name, merge_has_errors):
+def build_and_test(clean_build, vm_name, snapshot_name, merge_has_errors):
     if merge_has_errors == True:
         return (1,"Merge has Errors")
     success = build_images(clean_build)
