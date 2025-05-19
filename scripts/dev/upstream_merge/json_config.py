@@ -22,5 +22,5 @@ class json_config:
         self.email_log_level = config.get("email_log_level")
         self.log_level = config.get("log_level")
         self.clean_build = config.get("clean_build")
-        self.vm_name = config.get("vm_name")
+        self.vm_name = config.get("VM_name")
         self.snapshot_name = config.get("snapshot_name")
