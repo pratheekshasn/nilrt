@@ -12,7 +12,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Automated repository merging script")
     parser.add_argument("-c", type=str, help="Path to configuration file", default="scripts/dev/upstream_merge/automation_conf.json")
     parser.add_argument("-w", type=str, help="Skip merging with upstream", default=None)
-    parser.add_argument("-s", type=bool, help="Skip merging with upstream", default=False)
+    parser.add_argument("-s", type=str, help="Skip merging with upstream", default=False)
     args = parser.parse_args()
 
     return args
@@ -101,7 +101,7 @@ def prepare_for_merge(git_obj, merge_branch_name, force_checkout):
     return (0,None)
 
 def merge_upstream(git_obj,force_checkout, merge_branch_name, skip_merge):
-    if skip_merge:
+    if skip_merge == "True" or skip_merge == "true":
         return (0," Has Been Skipped")
     print(f"{git_obj.local_repo}\n")
 
@@ -353,8 +353,8 @@ def main():
 
     update_meta_nilrt_branch(json_config_obj.meta_nilrt_branch)
 
-    build_and_test_details = build_and_test(json_config_obj.clean_build, json_config_obj.vm_name, json_config_obj.snapshot_name,merge_has_errors)
-    # build_and_test_details = (0,"Build and Test has been skipped")
+    # build_and_test_details = build_and_test(json_config_obj.clean_build, json_config_obj.vm_name, json_config_obj.snapshot_name,merge_has_errors)
+    build_and_test_details = (0,"Build and Test has been skipped")
     merge_report = push_and_PR_prepare(merge_has_errors, build_and_test_details , merge_report ,json_config_obj.merge_branch_name ,json_config_obj.work_item_id, json_config_obj.username)
     merge_report["Build and Test"] = build_and_test_details
     

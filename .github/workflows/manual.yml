@@ -17,7 +17,7 @@ on:
 
       skip_merge:
         description: 'Skip the merge step'
-        default: False
+        default: "False"
         required: false
         type: string
 
