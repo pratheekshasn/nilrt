@@ -341,20 +341,20 @@ def main():
     json_config_obj = json_config(config_file_path,workitemID=args.w)    
     
     setup_logging(json_config_obj.log_level)
-    print(skip_merge)
+
     pull_from_nilrt_details = pull_from_base_branch(json_config_obj.NILRT_branch,"https://github.com/ni/nilrt.git") # To ensure that the NILRT branch is up to date in case files like 'repos.conf' are modified, which would be crucial to the current script
     if pull_from_nilrt_details[0] != 0:
         print(pull_from_nilrt_details[1])
         return
     
     merge_report = merge_submodules_with_upstream(json_config_obj.conf_file, json_config_obj.force_checkout, json_config_obj.username, json_config_obj.upstream_repo_name, json_config_obj.merge_branch_name, json_config_obj.fork_name, skip_merge)
-    print(merge_report)
+
     merge_has_errors = any(status != 0 for status, _ in merge_report.values())
 
     update_meta_nilrt_branch(json_config_obj.meta_nilrt_branch)
 
-    # build_and_test_details = build_and_test(json_config_obj.clean_build, json_config_obj.vm_name, json_config_obj.snapshot_name,merge_has_errors)
-    build_and_test_details = (0,"Build and Test has been skipped")
+    build_and_test_details = build_and_test(json_config_obj.clean_build, json_config_obj.vm_name, json_config_obj.snapshot_name,merge_has_errors)
+    
     merge_report = push_and_PR_prepare(merge_has_errors, build_and_test_details , merge_report ,json_config_obj.merge_branch_name ,json_config_obj.work_item_id, json_config_obj.username)
     merge_report["Build and Test"] = build_and_test_details
     
