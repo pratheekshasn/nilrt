@@ -17,9 +17,9 @@ on:
 
       skip_merge:
         description: 'Skip the merge step'
-        default: false
+        default: False
         required: false
-        type: boolean
+        type: string
 
 jobs:
   Run_upstream_merge_and_test_script:
