@@ -353,8 +353,8 @@ def main():
 
     update_meta_nilrt_branch(json_config_obj.meta_nilrt_branch)
 
-    # build_and_test_details = build_and_test(json_config_obj.clean_build, json_config_obj.vm_name, json_config_obj.snapshot_name,merge_has_errors)
-    build_and_test_details = (0,"Build and Test has been skipped")
+    build_and_test_details = build_and_test(json_config_obj.clean_build, json_config_obj.vm_name, json_config_obj.snapshot_name,merge_has_errors)
+    # build_and_test_details = (0,"Build and Test has been skipped")
     merge_report = push_and_PR_prepare(merge_has_errors, build_and_test_details , merge_report ,json_config_obj.merge_branch_name ,json_config_obj.work_item_id, json_config_obj.username)
     merge_report["Build and Test"] = build_and_test_details
     
