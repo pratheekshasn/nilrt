@@ -38,4 +38,5 @@ jobs:
     - name: Run Python upstream merge script
       env:
         GH_PAT: ${{ secrets.GH_PAT }}
-      run: python3 ${{ inputs.filename }} -w ${{ inputs.workItemID }} -s {{inputs.skip_merge}}
+      run: python3 ${{ inputs.filename }} -w ${{ inputs.workItemID }} -s ${{ inputs.skip_merge }}
+

@@ -243,7 +243,8 @@ def merge_submodules_with_upstream(conf_file, force_checkout, username, upstream
             if line.startswith("#"):
                 continue
             parts = line.split()
-            fork_url = f"https://x-access-token:${{ secrets.GH_PAT }}@github.com/{username}/" + parts[0].split("/")[1] + ".git"    
+            token = os.environ["GH_PAT"]
+            fork_url = f"https://x-access-token:{token}@github.com/{username}/" + parts[0].split("/")[1] + ".git"
             git_obj=GitRepo(local_repo=parts[0],
                             upstream_repo_url=parts[1],
                             upstream_branch=parts[2],
