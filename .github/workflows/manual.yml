@@ -15,6 +15,12 @@ on:
         required: true
         type: string
 
+      skip_merge:
+        description: 'Skip the merge step'
+        default: false
+        required: false
+        type: boolean
+
 jobs:
   Run_upstream_merge_and_test_script:
     runs-on: self-hosted
@@ -30,4 +36,6 @@ jobs:
       run: git config pull.rebase false
   
     - name: Run Python upstream merge script
-      run: python3 ${{ inputs.filename }} -w ${{ inputs.workItemID }}
+      env:
+        GH_PAT: ${{ secrets.GH_PAT }}
+      run: python3 ${{ inputs.filename }} -w ${{ inputs.workItemID }} -s {{inputs.skip_merge}}
