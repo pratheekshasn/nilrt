@@ -1,0 +1,194 @@
+# MOTIVATION
+
+To ensure the long-term maintainability and efficiency of the ni/nilrt repository, automating the upstream merge process is a crucial step. Manual upstream merges are often tedious, time-consuming, and prone to human error, especially as the size and frequency of upstream changes grow. By automating this process, we can significantly reduce the cost of maintenance by saving several hours of manual effort per release cycle. This allows developers to focus more on value-adding tasks rather than routine integration work. Automation also ensures that our fork stays closely aligned with upstream changes, minimizing future integration conflicts and making it easier to adopt new features, security patches, and bug fixes promptly. Overall, this improves the quality, stability, and security of the codebase while enhancing the team's productivity and responsiveness to upstream evolution.
+
+---
+
+# HOW TO USE THE MERGE SCRIPT
+
+This script automates the process of merging upstream changes, building images, and testing them on a virtual machine. Follow the steps below to use the script effectively.
+
+---
+
+## **Steps to Run the Script**
+
+### **1. Navigate to the root of the nilrt repo**
+```bash
+cd ~/nilrt
+```
+
+### **2. Run the Script**
+#### **To Perform a Merge**
+This will merge upstream changes, build the images, and test them:
+```bash
+python3 scripts/dev/upstream_merge/upstream_merge.py -w workItemID
+```
+
+**`Note`**:
+- If the configuration file is `automation_conf.json`, you do not need to specify its path explicitly, as it is set as default. However, if you are using a different configuration file, you must provide its path using the `-c` argument.For example:
+
+```bash
+python3 scripts/dev/upstream_merge/upstream_merge.py -c path/to/your_config.json -w workItemID
+```
+
+- **`workItemID`**:  
+The `workItemID` associated with the pull request. If `workItemID` is not provided `None` will be used.
+
+#### **To Skip the Merge and Only Build and Test**
+If you want to skip the merge step and directly proceed with building and testing:
+```bash
+python3 scripts/dev/upstream_merge/upstream_merge.py -w workItemID -s True
+```
+
+---
+
+## **Configuration File: `automation_conf.json`**
+
+The script relies on a configuration file (`automation_conf.json`) to define various parameters. **All fields are required**, and if a field is not present, `None` will be used as the default value. Below is an explanation of the fields in the configuration file:
+ 
+- **`NILRT_branch`**:
+  The nilrt branch to pull the latest changes from.
+
+- **`meta_nilrt_branch`**:
+  The meta-nilrt branch to pull the latest changes from.
+
+- **`conf_file_path`**:  
+  Path to the configuration file (default: [`repos.conf`](./repos.conf)).
+
+- **`force_checkout`**:  
+  Enables forceful checkout to the base branch if set to `True`.
+
+- **`upstream_repo_name`**:  
+  The name of the upstream remote repository.
+
+- **`merge_branch_name`**:  
+  The name of the branch where the merge will be performed.
+
+- **`username`**:  
+  GitHub username where the forks are maintained.
+
+- **`fork_name`**:
+  The name of the downstream fork repository where the merge will be performed. This is the repository owned by the user specified in the username field.
+
+- **`email_from`**:  
+  The email address from which the merge report will be sent.
+
+- **`email_to`**:  
+  The email address to which the merge report will be sent.
+
+- **`email_log_level`**:  
+  - **`0`**:  
+    - Includes the status of the upstream merge:  
+      - **`... OK`**: Merge completed successfully.  
+      - **`... OK (no changes)`**: No changes were detected during the merge.  
+      - **`... ERRORS`**: Errors occurred during the merge.  
+    - In case of a merge conflict, the error details will also be included in the email.
+
+  - **`1`**:  
+    - Includes the diff (differences) for a successful merge in addition to the status.
+
+- **`log_level`**:  
+  Integer representing the logging level:  
+  - `10`: DEBUG  
+  - `20`: INFO  
+  - `30`: WARNING  
+  - `40`: ERROR  
+  - `50`: CRITICAL
+
+- **`clean_build`**:
+  A boolean flag that determines whether to clean the build environment before starting the build process. If set to True, the script will remove all previous build artifacts to ensure a fresh build.
+  
+- **`vm_name`**:  
+  The name of the VM where the images will be tested.
+
+- **`snapshot_name`**:  
+  The snapshot of the VM to be restored before testing. This snapshot must have SSH enabled.
+
+---
+
+## **Script Overview**
+
+### **Workflow for Each Submodule in the `nilrt` Repository**
+
+1. **Check Out the Base Branch**:  
+   - The script checks out the base branch as specified in the [`repos.conf`](./repos.conf) file.
+
+2. **Pull the Upstream Branch**:  
+   - The upstream branch mentioned in [`repos.conf`](./repos.conf) is pulled to ensure the latest changes are fetched.
+
+3. **Merge the Two Branches**:  
+   - The base branch and the upstream branch are merged.
+   - The script reports whether the merge was successful or if it encountered any conflicts.
+
+4. **Build Images on Successful Merge**:  
+   - If the merge is successful, the script proceeds to build the following images:
+     - **Safemode Image**
+     - **Runmode Image**
+
+5. **Install Images on the RT Target (VM)**:  
+   - The safemode and runmode images are installed on a Real-Time (RT) target, which is a Virtual Machine in this case.
+
+6. **Test the Installation**:  
+   - The script verifies that the installation is not faulty by running tests on the VM.
+
+**Important Note**
+Currently, the VM and the snapshot required for this script exist only on the tonks machine. As a result, the script can only be run on this machine. In the future, we plan to set up a YAML-based script (or a similar automation tool) to run the entire process on this machine.
+This will eliminate the need for every user to set up a VM just to execute the script, making it more accessible and user-friendly.
+
+---
+
+## **Supporting Files**
+
+### **`shell_commands.py`**
+- Provides utility functions to execute shell commands.  
+- Acts as a wrapper for running system commands from Python.
+
+### **`git_commands.py`**
+- Contains various Git-related functions that rely on `shell_commands.py`.  
+- Includes operations like fetching, pulling, creating branches, and merging.
+
+### **`GitRepo.py`**
+- Defines the `GitRepo` class, which encapsulates details and operations for a Git repository.  
+-  Data members are:
+    - local_repo
+    - local_base_branch
+    - upstream_branch
+    - upstream_repo_name
+    - upstream_repo_url
+    - fork_name
+    - fork_url
+
+### **`build.py`**
+- Handles the process of building images.  
+- Key steps include:
+  - Setting up the Docker environment.
+  - Building core feeds.
+  - Building core images.
+
+### **`test.py`**
+- Manages testing of the built images on a VM.  
+- Key steps include:
+  - Restoring the VM to a specific snapshot.
+  - Installing and testing safemode and runmode images.
+  - Verifying the OS version.
+
+### ** `json_config.py`**
+- Handles reading and validating the configuration file (`automation_conf.json`).
+- Key responsibilities include:
+  - Parsing the JSON configuration file.
+  - Validating required fields and their values.
+  - Providing easy access to configuration parameters for other scripts.
+  
+---
+
+## Contact
+Contact
+If you have any questions or need assistance, feel free to contact:
+
+- Name: Shreejit C
+  - GitHub Username: Shreejit-03
+  - Email: shreejit.c@emerson.com
+
+- Name: Pratheeksha S N
+  - GitHub Username: pratheekshasn
+  - Email: pratheeksha.s.n@emerson.com
