@@ -9,9 +9,55 @@ This changelog attempts to conform to the changelog spec on [keepachangelog.org]
 The evergreen, canonical changelog for *all NILRT branches* can be [found here](https://github.com/ni/nilrt/blob/HEAD/CHANGELOG.md).
 
 ## Latest Updates
-* nilrt: 301
-* meta-nilrt: 812
-* linux: 215
+* nilrt: 320
+* meta-nilrt: 869
+* linux: 254
+
+----
+## 11.3
+Branch: `nilrt/25.8/scarthgap`
+
+### nilrt
+
+#### Changed
+- [Enabled](https://github.com/ni/linux/pull/242) legacy cgroups v1 cpusets.
+- [Enabled](https://github.com/ni/linux/pull/245) scheduler's debugfs interface.
+
+### meta-nilrt
+
+
+#### Added
+- [Added](https://github.com/ni/meta-nilrt/pull/834) additional kernel modules to feeds.
+- [Added](https://github.com/ni/meta-nilrt/pull/853) perfetto to extras feed.
+- [Added](https://github.com/ni/meta-nilrt/pull/854) usbguard to extras feed.
+
+#### Changed
+- [Upgraded](https://github.com/ni/meta-nilrt/pull/862) `linux-nilrt` to `6.12`.
+- [Disabled](https://github.com/ni/meta-nilrt/pull/864) fair server in 6.12 kernel to prevent priority inversion.
+
+
+----
+## 11.2
+Branch: `nilrt/25.5/scarthgap`
+
+### nilrt
+No changes.
+
+### meta-nilrt
+
+
+#### Added
+- [Added](https://github.com/ni/meta-nilrt/pull/835) support for wired `802.1X`.
+- [Added](https://github.com/ni/meta-nilrt/pull/839) `/var/log`, `/var/local/natinst/log`, `/var/lib/pstore` to Hardware Configuration Utility Technical Support Report.
+- [Added](https://github.com/ni/meta-nilrt/pull/842) nilrt container images.
+- [Added](https://github.com/ni/meta-nilrt/pull/852) scripts to support tracing from LabVIEW.
+
+#### Changed
+- [Upgraded](https://github.com/ni/meta-nilrt/pull/821) `linux-nilrt-next` to `6.12`.
+- [Enabled](https://github.com/ni/meta-nilrt/pull/840) persistent logging by default.
+
+#### Fixed
+- [Fixed](https://github.com/ni/meta-nilrt/pull/833) coreutils package priority value.
 
 
 ----
@@ -393,6 +439,19 @@ Branch: `nilrt/22.5/hardknott`
 - [Removed](https://github.com/ni/meta-nilrt/pull/355) boot attestation based on now dead upstream code.
 - [Removed](https://github.com/ni/meta-nilrt/pull/290) packages dropped from upstream.
 
+
+----
+## 8.25
+Branch: `nilrt/25.8/sumo`
+
+No changes.
+
+
+----
+## 8.24
+Branch: `nilrt/25.5/sumo`
+
+No changes.
 
 ----
 ## 8.23
